@@ -483,16 +483,20 @@ do_update() {
     echo "Версия для обновления:"
     echo "  1) Стабильная ($STABLE_DATE, коммит $STABLE_COMMIT) — проверена"
     echo "  2) Последняя (master) — на свой риск"
-    read -rp "Выберите [1/2]: " UPDATE_TYPE
-
+    echo "  3) Отмена"
+    read -rp "Выберите [1/2/3]: " UPDATE_TYPE
+    
     if [ "$UPDATE_TYPE" = "1" ]; then
         git fetch origin
         git checkout $STABLE_COMMIT
         info "Используется стабильная версия: $STABLE_COMMIT ($STABLE_DATE)"
-    else
+    elif [ "$UPDATE_TYPE" = "2" ]; then
         git checkout master
         git pull origin master
         info "Используется последняя версия (master)"
+    else
+        info "Обновление отменено"
+        exit 0
     fi
 
     sed -i 's|git@github.com:|https://github.com/|g' rebar.config
