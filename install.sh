@@ -252,7 +252,9 @@ write_config() {
     {policy, [
       {in_table, tls_domain, personal_domains},
       {max_connections, [tls_domain], 100}
-    ]}
+    ]},
+    {per_sni_secrets, on},
+    {per_sni_secret_salt, <<"${salt}">>}
   ]},
   {personal_mtproxy, [
     {admin_password, "${admin_pass}"},
