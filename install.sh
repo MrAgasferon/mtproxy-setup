@@ -639,6 +639,9 @@ case "$COMMAND" in
         activate_erlang
         do_update
         ;;
+    reinstall)
+        do_reinstall
+        ;;
     status)
         do_status
         ;;
@@ -649,6 +652,7 @@ case "$COMMAND" in
         echo "  backup   — создать резервную копию"
         echo "  restore  — восстановить из резервной копии"
         echo "  update   — обновить до последней версии"
+        echo "  reinstall — удалить и установить заново"
         echo "  status   — показать состояние сервиса"
         exit 1
         ;;
