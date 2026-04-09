@@ -144,7 +144,7 @@ get_certificate_duckdns() {
     certbot certonly \
         --authenticator dns-duckdns \
         --dns-duckdns-credentials ~/.secrets/duckdns.ini \
-        --dns-duckdns-propagation-seconds 120 \
+        --dns-duckdns-propagation-seconds 240 \
         --email "$email" \
         --agree-tos \
         --non-interactive \
