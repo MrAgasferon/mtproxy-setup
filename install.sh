@@ -595,7 +595,27 @@ do_install() {
     echo "    Обновление:  bash install.sh update"
     echo ""
 }
+do_reinstall() {
+    check_root
+    warn "Это удалит текущую установку и начнёт заново!"
+    read -rp "Продолжить? [y/N]: " CONFIRM
+    [[ "$CONFIRM" =~ ^[Yy]$ ]] || { info "Отменено"; exit 0; }
 
+    info "Останавливаем сервис..."
+    systemctl stop $SERVICE 2>/dev/null || true
+    systemctl disable $SERVICE 2>/dev/null || true
+
+    info "Удаляем старую установку..."
+    rm -rf "$INSTALL_DIR"
+    rm -rf "$OPT_DIR"
+    rm -f /etc/systemd/system/${SERVICE}.service
+    rm -f /usr/local/bin/rebar3
+    systemctl daemon-reload
+
+    success "Старая установка удалена"
+    info "Запускаем установку заново..."
+    do_install
+}
 # =============================================================================
 # Точка входа
 # =============================================================================
