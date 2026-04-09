@@ -229,7 +229,6 @@ write_config() {
     local domain=$1
     local secret=$2
     local admin_pass=$3
-    local salt=$4
 
     info "Записываем конфигурацию..."
 
@@ -253,9 +252,7 @@ write_config() {
     {policy, [
       {in_table, tls_domain, personal_domains},
       {max_connections, [tls_domain], 100}
-    ]},
-    {per_sni_secrets, on},
-    {per_sni_secret_salt, <<"${salt}">>}
+    ]}
   ]},
   {personal_mtproxy, [
     {admin_password, "${admin_pass}"},
@@ -486,7 +483,7 @@ do_update() {
     sed -i 's|git@github.com:|https://github.com/|g' rebar.lock
 
     apply_patches "$domain"
-    write_config "$domain" "$secret" "$admin_pass" "$salt"
+    write_config "$domain" "$secret" "$admin_pass"
 
     info "Пересобираем..."
     make
@@ -581,7 +578,6 @@ do_install() {
     [ -z "$ADMIN_PASS" ] && error "Пароль не может быть пустым"
 
     SECRET=$(openssl rand -hex 16)
-    SALT=$(openssl rand -hex 16)
     info "Сгенерирован секрет прокси: $SECRET"
 
     echo ""
@@ -607,7 +603,7 @@ do_install() {
 
     clone_repo
     apply_patches "$DOMAIN"
-    write_config "$DOMAIN" "$SECRET" "$ADMIN_PASS" "$SALT"
+    write_config "$DOMAIN" "$SECRET" "$ADMIN_PASS"
     build_and_install
     setup_cron
 
