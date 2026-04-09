@@ -282,13 +282,12 @@ get_domain_from_config() {
 }
 
 build_and_install() {
+    info "Останавливаем сервис если запущен..."
+    systemctl stop $SERVICE 2>/dev/null || true
+
     info "Собираем проект (может занять несколько минут)..."
     cd "$INSTALL_DIR"
     make
-
-    if systemctl is-active --quiet $SERVICE 2>/dev/null; then
-        systemctl stop $SERVICE
-    fi
 
     make install
 
