@@ -20,9 +20,9 @@ handle(Req = #{method := <<"POST">>, path := <<"/api/proxies">>}) ->
     {ok, Body, Req1} = cowboy_req:read_body(Req),
     Params = uri_string:dissect_query(Body),
     Email = proplists:get_value(<<"email">>, Params, <<>>),
-    case pm_registry:register(Email) of
+    {ok, BaseDomain} = application:get_env(personal_mtproxy, base_domain),
+    case pm_registry:register(Email, list_to_binary(BaseDomain)) of
         {ok, Subdomain, Port, BaseSecret} ->
-            {ok, BaseDomain} = application:get_env(personal_mtproxy, base_domain),
             Secret = iolist_to_binary([<<"ee">>,
                                        string:lowercase(BaseSecret),
                                        string:lowercase(binary:encode_hex(Subdomain))]),
