@@ -483,8 +483,8 @@ do_status() {
 
     # Активные соединения
     CONNS=$("$OPT_DIR/bin/personal_mtproxy" eval \
-        'lists:sum([proplists:get_value(all_connections, L) || {_, L} <- ranch:info()]).' \
-        2>/dev/null | tr -d '\n' || echo "N/A")
+    'lists:sum([maps:get(all_connections, L) || {_, L} <- maps:to_list(ranch:info())]).' \
+    2>/dev/null | tr -d '\n' || echo "N/A")
     echo " Соединений:  $CONNS"
 
     # Количество пользователей
