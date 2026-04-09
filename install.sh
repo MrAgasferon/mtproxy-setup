@@ -612,7 +612,7 @@ do_install() {
     echo -e "   ${GREEN}Установка завершена успешно!${NC}"
     echo "═══════════════════════════════════════════"
     echo ""
-    echo "  Страница регистрации:  https://$DOMAIN/"
+    echo "  Страница заглушки:  https://$DOMAIN/"
     echo "  Панель администратора: https://$DOMAIN/admin.html"
     echo ""
     echo -e "${YELLOW}  Не забудьте открыть порт 443 в вашем firewall!${NC}"
