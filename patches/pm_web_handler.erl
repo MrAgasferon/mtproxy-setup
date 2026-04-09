@@ -23,8 +23,18 @@ handle(Req = #{method := <<"POST">>, path := <<"/api/proxies">>}) ->
     {ok, BaseDomain} = application:get_env(personal_mtproxy, base_domain),
     case pm_registry:register(Email, list_to_binary(BaseDomain)) of
         {ok, Subdomain, Port, BaseSecret} ->
+            UserSecret = case application:get_env(mtproto_proxy, per_sni_secrets, off) of
+                on ->
+                    Salt = application:get_env(mtproto_proxy, per_sni_secret_salt,
+                                               <<"mtproto-proxy-per-sni-v1">>),
+                    mtp_fake_tls:derive_sni_secret(
+                        binary:decode_hex(string:uppercase(BaseSecret)),
+                        Subdomain, Salt);
+                _ ->
+                    BaseSecret
+            end,
             Secret = iolist_to_binary([<<"ee">>,
-                                       string:lowercase(BaseSecret),
+                                       string:lowercase(binary:encode_hex(UserSecret)),
                                        string:lowercase(binary:encode_hex(Subdomain))]),
             Query = uri_string:compose_query([
               {<<"server">>, list_to_binary(BaseDomain)},
