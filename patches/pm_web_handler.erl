@@ -35,7 +35,7 @@ handle(Req = #{method := <<"POST">>, path := <<"/api/proxies">>}) ->
                                        string:lowercase(binary:encode_hex(UserSecret)),
                                        string:lowercase(binary:encode_hex(Subdomain))]),
             Query = uri_string:compose_query([
-              {<<"server">>, list_to_binary(BaseDomain)},
+              {<<"server">>, Subdomain},  %% используем subdomain, а не BaseDomain
               {<<"port">>,   integer_to_binary(Port)},
               {<<"secret">>, Secret}
             ]),
