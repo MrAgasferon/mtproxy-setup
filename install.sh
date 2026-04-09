@@ -81,9 +81,9 @@ get_latest_erlang_version() {
 
 install_erlang() {
     if command -v erl &>/dev/null; then
-        CURRENT=$(erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell 2>/dev/null | tr -d '"')
+        CURRENT=$(erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell 2>/dev/null | grep -o '[0-9]*' | head -1)
         info "Erlang уже установлен: OTP $CURRENT"
-        if [ "$CURRENT" -ge 25 ] 2>/dev/null; then
+        if [ -n "$CURRENT" ] && [ "$CURRENT" -ge 25 ] 2>/dev/null; then
             success "Версия подходит"
             return
         fi
