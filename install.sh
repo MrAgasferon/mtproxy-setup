@@ -200,10 +200,11 @@ clone_repo() {
     fi
     info "Клонируем personal_mtproxy..."
     git clone "$UPSTREAM_URL" "$INSTALL_DIR"
-
-    # Исправляем SSH→HTTPS в зависимостях
-    sed -i 's|git@github.com:|https://github.com/|g' "$INSTALL_DIR/rebar.config"
-    sed -i 's|git@github.com:|https://github.com/|g' "$INSTALL_DIR/rebar.lock"
+    cd "$INSTALL_DIR"
+    git checkout $STABLE_COMMIT
+    info "Используется проверенная версия: $STABLE_COMMIT ($STABLE_DATE)"
+    sed -i 's|git@github.com:|https://github.com/|g' rebar.config
+    sed -i 's|git@github.com:|https://github.com/|g' rebar.lock
     success "Репозиторий клонирован"
 }
 
@@ -464,10 +465,8 @@ do_restore() {
 
 do_update() {
     info "Обновление personal_mtproxy..."
-
     info "Создаём резервную копию перед обновлением..."
     do_backup
-
     activate_erlang
 
     # Извлекаем параметры из текущего конфига
@@ -476,13 +475,25 @@ do_update() {
     local domain=$(get_domain_from_config)
     local secret=$(grep "secret.*<<" "$cfg" | head -1 | sed 's/.*<<"\(.*\)">>.*/\1/')
     local admin_pass=$(grep "admin_password" "$cfg" | sed 's/.*"\(.*\)".*/\1/')
-    local salt=$(grep 'per_sni_secret_salt' "$cfg" | sed 's/.*<<"\(.*\)">>.*/\1/')
-
     [ -z "$domain" ] && error "Не удалось определить домен из конфига"
 
     cd "$INSTALL_DIR"
-    info "Получаем обновления из upstream..."
-    git pull origin master
+
+    echo ""
+    echo "Версия для обновления:"
+    echo "  1) Стабильная ($STABLE_DATE, коммит $STABLE_COMMIT) — проверена"
+    echo "  2) Последняя (master) — на свой риск"
+    read -rp "Выберите [1/2]: " UPDATE_TYPE
+
+    if [ "$UPDATE_TYPE" = "1" ]; then
+        git fetch origin
+        git checkout $STABLE_COMMIT
+        info "Используется стабильная версия: $STABLE_COMMIT ($STABLE_DATE)"
+    else
+        git checkout master
+        git pull origin master
+        info "Используется последняя версия (master)"
+    fi
 
     sed -i 's|git@github.com:|https://github.com/|g' rebar.config
     sed -i 's|git@github.com:|https://github.com/|g' rebar.lock
