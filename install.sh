@@ -307,7 +307,19 @@ build_and_install() {
     cd "$INSTALL_DIR"
     make
 
-    make install
+    # Устанавливаем вручную минуя проблемный make install
+    info "Устанавливаем..."
+    useradd -r $SERVICE 2>/dev/null || true
+    mkdir -p /var/log/$SERVICE
+    chown $SERVICE /var/log/$SERVICE
+    mkdir -p /var/lib/$SERVICE
+    chown $SERVICE /var/lib/$SERVICE
+    mkdir -p /opt
+    cp -r _build/prod/rel/personal_mtproxy /opt/
+    mkdir -p $OPT_DIR/log/
+    chmod 777 $OPT_DIR/log/
+    install -D config/personal-mtproxy.service /etc/systemd/system/${SERVICE}.service
+    systemctl daemon-reload
 
     deploy_beams
 
