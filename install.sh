@@ -207,7 +207,7 @@ apply_patches() {
         -o "$INSTALL_DIR/priv/htdocs/index.html"
 
     # Подставляем домен в index.html
-    sed -i "s|ВАШ_ДОМЕН|$domain|g" "$INSTALL_DIR/priv/htdocs/index.html"
+    sed -i "s|example.com|$domain|g" "$INSTALL_DIR/priv/htdocs/index.html"
 
     success "Патчи применены"
 }
@@ -518,7 +518,7 @@ do_install() {
     echo ""
 
     # Спрашиваем параметры
-    read -rp "Ваш домен (например myproxy.duckdns.org): " DOMAIN
+    read -rp "Ваш домен (например example.com): " DOMAIN
     [ -z "$DOMAIN" ] && error "Домен не может быть пустым"
 
     echo ""
