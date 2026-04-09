@@ -1,5 +1,153 @@
 # MTProxy Setup
 
+Скрипт установки, обновления и управления [personal_mtproxy](https://github.com/seriyps/personal_mtproxy) с расширенным функционалом.
+
+## Что включено
+
+- Автоматическая установка Erlang последней версии через kerl
+- Получение TLS-сертификата через certbot (DuckDNS или собственный домен)
+- Панель администратора с мониторингом соединений в реальном времени
+- Basic Auth защита админки — пароль хранится на сервере, не в HTML
+- Расширенный API (`/api/config`, `/api/proxies`, `/api/connections`)
+- Страница-заглушка (парковка домена) на главной странице
+- Автообновление скрипта при запуске install/update/reinstall
+- Резервные копии с возможностью отката
+
+## Требования
+
+- Ubuntu 22.04 или 24.04
+- Порт 443 свободен
+- Домен или бесплатный поддомен [DuckDNS](https://www.duckdns.org)
+- Root доступ
+
+## Быстрый старт
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/MrAgasferon/mtproxy-setup/main/install.sh -o install.sh
+bash install.sh
+```
+
+Скрипт задаст несколько вопросов и всё установит автоматически.
+
+## Команды
+
+| Команда | Описание |
+|---------|----------|
+| `bash install.sh` или `bash install.sh install` | Установка с нуля |
+| `bash install.sh reinstall` | Удалить старую установку и установить заново |
+| `bash install.sh update` | Обновить до последней версии upstream |
+| `bash install.sh backup` | Создать резервную копию |
+| `bash install.sh restore` | Восстановить из резервной копии |
+| `bash install.sh status` | Показать состояние сервиса |
+
+## Процесс установки
+
+Скрипт автоматически выполняет следующие шаги:
+
+1. Устанавливает системные зависимости
+2. Определяет и собирает последнюю версию Erlang/OTP через kerl
+3. Устанавливает rebar3 и certbot
+4. Получает TLS-сертификат (wildcard для DuckDNS, обычный для своего домена)
+5. Клонирует репозиторий personal_mtproxy
+6. Применяет патчи (расширенный API, Basic Auth, страница-заглушка)
+7. Записывает конфигурацию
+8. Собирает и устанавливает сервис
+9. Настраивает автообновление сертификата через cron
+
+## После установки
+
+Сервис доступен по адресам:
+
+- `https://ВАШ_ДОМЕН/` — страница-заглушка (парковка домена)
+- `https://ВАШ_ДОМЕН/admin.html` — панель администратора (требует пароль)
+
+**Не забудьте открыть порт 443** — скрипт намеренно не трогает firewall:
+
+```bash
+# ufw
+sudo ufw allow 443/tcp
+
+# iptables
+sudo iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+```
+
+## Панель администратора
+
+Открывается по адресу `https://ВАШ_ДОМЕН/admin.html`. Браузер запросит логин и пароль (Basic Auth). Логин — любой, пароль — тот что вы указали при установке.
+
+Возможности панели:
+- Создание новых прокси-ссылок
+- Список всех пользователей с датой регистрации
+- Мониторинг активных соединений в реальном времени (обновление каждые 10 сек)
+- Копирование ссылок (`t.me`, `tg://`, секрет)
+- Отзыв доступа у пользователя
+
+## Резервные копии
+
+Бэкапы хранятся в `/root/mtproxy_backups/` и **никогда не удаляются автоматически** — ни при `reinstall`, ни при `update`, ни при `restore`.
+
+Каждый бэкап содержит:
+- База пользователей (`proxies.dets`)
+- Конфигурация (`sys.config`)
+- Исходники с патчами
+- Бинарники (`/opt/personal_mtproxy`)
+
+Перед каждым `update` автоматически создаётся бэкап.
+
+## Автообновление скрипта
+
+При запуске команд `install`, `reinstall`, `update` скрипт автоматически проверяет и скачивает свою последнюю версию из GitHub перед выполнением. Если вы всегда запускаете команды через:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/MrAgasferon/mtproxy-setup/main/install.sh -o install.sh && bash install.sh КОМАНДА
+```
+
+— вы всегда получаете актуальную версию.
+
+## Структура репозитория
+
+```
+mtproxy-setup/
+├── install.sh                       # главный скрипт управления
+├── patches/
+│   ├── pm_web_handler.erl           # расширенный API handler
+│   ├── pm_auth_middleware.erl       # Basic Auth middleware
+│   └── personal_mtproxy_app.erl    # роуты + подключение middleware
+├── htdocs/
+│   ├── admin.html                   # панель администратора
+│   └── index.html                   # страница-заглушка
+└── README.md
+```
+
+## API эндпоинты
+
+Все эндпоинты защищены Basic Auth.
+
+| Метод | Путь | Описание |
+|-------|------|----------|
+| `POST` | `/api/proxies` | Создать новый прокси (параметр: `email`) |
+| `DELETE` | `/api/proxies?subdomain=XXX` | Отозвать доступ |
+| `GET` | `/api/proxies` | Список всех пользователей |
+| `GET` | `/api/config` | Конфигурация прокси (секрет, порт, домен) |
+| `GET` | `/api/connections` | Активные соединения по subdomain |
+
+## Расположение файлов
+
+| Путь | Содержимое |
+|------|------------|
+| `/opt/personal_mtproxy/` | Бинарники сервиса |
+| `/root/personal_mtproxy/` | Исходники |
+| `/var/lib/personal_mtproxy/` | База пользователей и сертификаты |
+| `/var/log/personal_mtproxy/` | Логи |
+| `/root/mtproxy_backups/` | Резервные копии |
+| `/etc/systemd/system/personal_mtproxy.service` | Systemd unit |
+
+## Источники
+
+- [personal_mtproxy](https://github.com/seriyps/personal_mtproxy) — оригинальное демо-приложение
+- [mtproto_proxy](https://github.com/seriyps/mtproto_proxy) — ядро прокси на Erlang
+- [Статья на Хабре](https://habr.com/ru/articles/1019648/) — подробное описание архитектуры# MTProxy Setup
+
 Скрипт установки, обновления и управления [personal_mtproxy](https://github.com/seriyps/personal_mtproxy) с расширенным функционалом:
 
 - Панель администратора с мониторингом соединений в реальном времени
