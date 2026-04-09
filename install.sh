@@ -312,7 +312,7 @@ build_and_install() {
     cd "$INSTALL_DIR"
     make
 
-    # Устанавливаем вручную минуя проблемный make install
+    # Устанавливаем вручную
     info "Устанавливаем..."
     useradd -r $SERVICE 2>/dev/null || true
     mkdir -p /var/log/$SERVICE
