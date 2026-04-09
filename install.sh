@@ -52,7 +52,6 @@ install_deps() {
 }
 
 get_latest_erlang_version() {
-    # Берём последний релиз мажорной ветки 27+
     curl -s https://api.github.com/repos/erlang/otp/releases \
         | grep '"tag_name"' \
         | grep '"OTP-2[789]\.' \
@@ -169,15 +168,6 @@ get_certificate_http() {
         -d "$domain"
 }
 
-fix_cert_permissions() {
-    local domain=$1
-    chmod 755 /etc/letsencrypt/live 2>/dev/null || true
-    chmod 755 /etc/letsencrypt/archive 2>/dev/null || true
-    chmod 755 /etc/letsencrypt/archive/$domain 2>/dev/null || true
-    chmod 755 /etc/letsencrypt/live/$domain 2>/dev/null || true
-    chmod 640 /etc/letsencrypt/archive/$domain/privkey1.pem 2>/dev/null || true
-}
-
 clone_repo() {
     if [ -d "$INSTALL_DIR" ]; then
         warn "Директория $INSTALL_DIR уже существует, пропускаем клонирование"
@@ -194,12 +184,9 @@ clone_repo() {
 
 apply_patches() {
     local domain=$1
-    local secret=$2
-    local admin_pass=$3
 
     info "Применяем патчи..."
 
-    # Скачиваем наши доработанные файлы
     PATCHES_URL="https://raw.githubusercontent.com/MrAgasferon/mtproxy-setup/main"
 
     curl -fsSL "$PATCHES_URL/patches/pm_web_handler.erl" \
@@ -213,7 +200,6 @@ apply_patches() {
     curl -fsSL "$PATCHES_URL/htdocs/index.html" \
         -o "$INSTALL_DIR/priv/htdocs/index.html"
 
-    # Подставляем домен в index.html
     sed -i "s|example.com|$domain|g" "$INSTALL_DIR/priv/htdocs/index.html"
 
     success "Патчи применены"
@@ -283,6 +269,18 @@ EOF
     success "Конфигурация записана"
 }
 
+get_rel_vsn() {
+    cat "$OPT_DIR/releases/start_erl.data" 2>/dev/null | cut -d " " -f 2
+}
+
+get_domain_from_config() {
+    local cfg="$OPT_DIR/releases/$(get_rel_vsn)/sys.config"
+    grep 'domain[[:space:]]*=>' "$cfg" 2>/dev/null \
+        | grep -v 'tls_domain\|admin\|base_domain' \
+        | head -1 \
+        | sed 's/.*"\(.*\)".*/\1/'
+}
+
 build_and_install() {
     info "Собираем проект (может занять несколько минут)..."
     cd "$INSTALL_DIR"
@@ -293,9 +291,7 @@ build_and_install() {
     fi
 
     make install
-    mkdir -p /var/lib/personal_mtproxy
 
-    # Деплоим beam файлы (make install не перезаписывает существующие)
     deploy_beams
 
     systemctl enable $SERVICE
@@ -304,7 +300,8 @@ build_and_install() {
 }
 
 deploy_beams() {
-    local lib_dir="$OPT_DIR/lib/personal_mtproxy-0.1.0"
+    local REL_VSN=$(get_rel_vsn)
+    local lib_dir="$OPT_DIR/lib/personal_mtproxy-${REL_VSN}"
     local build_lib="$INSTALL_DIR/_build/prod/lib/personal_mtproxy/ebin"
 
     info "Деплоим скомпилированные модули..."
@@ -316,12 +313,14 @@ deploy_beams() {
     done
 
     # Деплоим статические файлы
-    cp -rf "$INSTALL_DIR/_build/prod/rel/personal_mtproxy/lib/personal_mtproxy-0.1.0/priv" \
-           "$lib_dir/"
+    if [ -d "$INSTALL_DIR/_build/prod/rel/personal_mtproxy/lib/personal_mtproxy-${REL_VSN}/priv" ]; then
+        cp -rf "$INSTALL_DIR/_build/prod/rel/personal_mtproxy/lib/personal_mtproxy-${REL_VSN}/priv" \
+               "$lib_dir/"
+    fi
 
     # Деплоим конфиг
     cp "$INSTALL_DIR/config/sys.config" \
-       "$OPT_DIR/releases/0.1.0/sys.config"
+       "$OPT_DIR/releases/${REL_VSN}/sys.config"
 
     success "Модули задеплоены"
 }
@@ -347,8 +346,9 @@ do_backup() {
     [ -f "$DETS_FILE" ] && cp "$DETS_FILE" "$backup_path/"
 
     # Конфиги
-    [ -f "$OPT_DIR/releases/0.1.0/sys.config" ] && \
-        cp "$OPT_DIR/releases/0.1.0/sys.config" "$backup_path/sys.config"
+    local REL_VSN=$(get_rel_vsn)
+    [ -f "$OPT_DIR/releases/${REL_VSN}/sys.config" ] && \
+        cp "$OPT_DIR/releases/${REL_VSN}/sys.config" "$backup_path/sys.config"
     [ -f "$INSTALL_DIR/config/sys.config" ] && \
         cp "$INSTALL_DIR/config/sys.config" "$backup_path/sys.config.src"
 
@@ -401,8 +401,9 @@ do_restore() {
     fi
 
     # Восстанавливаем конфиг
+    local REL_VSN=$(get_rel_vsn)
     if [ -f "$backup_path/sys.config" ]; then
-        cp "$backup_path/sys.config" "$OPT_DIR/releases/0.1.0/sys.config"
+        cp "$backup_path/sys.config" "$OPT_DIR/releases/${REL_VSN}/sys.config"
         success "Конфиг восстановлен"
     fi
 
@@ -431,29 +432,29 @@ do_restore() {
 do_update() {
     info "Обновление personal_mtproxy..."
 
-    # Автобэкап перед обновлением
     info "Создаём резервную копию перед обновлением..."
     do_backup
 
     activate_erlang
 
+    # Извлекаем параметры из текущего конфига
+    local REL_VSN=$(get_rel_vsn)
+    local cfg="$OPT_DIR/releases/${REL_VSN}/sys.config"
+    local domain=$(get_domain_from_config)
+    local secret=$(grep "secret.*<<" "$cfg" | head -1 | sed 's/.*<<"\(.*\)">>.*/\1/')
+    local admin_pass=$(grep "admin_password" "$cfg" | sed 's/.*"\(.*\)".*/\1/')
+
+    [ -z "$domain" ] && error "Не удалось определить домен из конфига"
+
     cd "$INSTALL_DIR"
     info "Получаем обновления из upstream..."
     git pull origin master
 
-    # Исправляем SSH→HTTPS на случай если rebar.lock обновился
     sed -i 's|git@github.com:|https://github.com/|g' rebar.config
     sed -i 's|git@github.com:|https://github.com/|g' rebar.lock
 
-    # Применяем патчи заново
-    local domain=$(grep "base_domain" "$OPT_DIR/releases/0.1.0/sys.config" | \
-                   sed 's/.*"\(.*\)".*/\1/')
-    local secret=$(grep "secret.*<<" "$OPT_DIR/releases/0.1.0/sys.config" | \
-                   head -1 | sed 's/.*<<"\(.*\)">>.*/\1/')
-    local admin_pass=$(grep "admin_password" "$OPT_DIR/releases/0.1.0/sys.config" | \
-                       sed 's/.*"\(.*\)".*/\1/')
-
-    apply_patches "$domain" "$secret" "$admin_pass"
+    apply_patches "$domain"
+    write_config "$domain" "$secret" "$admin_pass"
 
     info "Пересобираем..."
     make
@@ -495,9 +496,8 @@ do_status() {
         2>/dev/null | tr -d '\n' || echo "N/A")
     echo " Пользователей: $USERS"
 
-    # Срок сертификата
-    DOMAIN=$(grep "base_domain" "$OPT_DIR/releases/0.1.0/sys.config" 2>/dev/null | \
-             sed 's/.*"\(.*\)".*/\1/')
+    # Домен и сертификат
+    DOMAIN=$(get_domain_from_config)
     if [ -n "$DOMAIN" ]; then
         CERT_EXPIRY=$(openssl x509 -enddate -noout \
             -in "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" 2>/dev/null | \
@@ -526,7 +526,6 @@ do_install() {
     echo "═══════════════════════════════════════════"
     echo ""
 
-    # Спрашиваем параметры
     read -rp "Ваш домен (например example.com): " DOMAIN
     [ -z "$DOMAIN" ] && error "Домен не может быть пустым"
 
@@ -542,7 +541,7 @@ do_install() {
         [ -z "$DUCKDNS_TOKEN" ] && error "Token не может быть пустым"
     fi
 
-    read -rp "Email для Let's Encrypt (для уведомлений об истечении): " CERT_EMAIL
+    read -rp "Email для Let's Encrypt: " CERT_EMAIL
     [ -z "$CERT_EMAIL" ] && error "Email не может быть пустым"
 
     read -rsp "Пароль для панели администратора: " ADMIN_PASS
@@ -572,10 +571,9 @@ do_install() {
     else
         get_certificate_http "$DOMAIN" "$CERT_EMAIL"
     fi
-    fix_cert_permissions "$DOMAIN"
 
     clone_repo
-    apply_patches "$DOMAIN" "$SECRET" "$ADMIN_PASS"
+    apply_patches "$DOMAIN"
     write_config "$DOMAIN" "$SECRET" "$ADMIN_PASS"
     build_and_install
     setup_cron
@@ -585,16 +583,16 @@ do_install() {
     echo -e "   ${GREEN}Установка завершена успешно!${NC}"
     echo "═══════════════════════════════════════════"
     echo ""
-    echo "  Страница регистрации: https://$DOMAIN/"
+    echo "  Страница регистрации:  https://$DOMAIN/"
     echo "  Панель администратора: https://$DOMAIN/admin.html"
     echo ""
     echo -e "${YELLOW}  Не забудьте открыть порт 443 в вашем firewall!${NC}"
     echo ""
     echo "  Управление:"
-    echo "    Статус:   bash install.sh status"
-    echo "    Бэкап:    bash install.sh backup"
-    echo "    Откат:    bash install.sh restore"
-    echo "    Обновление: bash install.sh update"
+    echo "    Статус:      bash install.sh status"
+    echo "    Бэкап:       bash install.sh backup"
+    echo "    Откат:       bash install.sh restore"
+    echo "    Обновление:  bash install.sh update"
     echo ""
 }
 
