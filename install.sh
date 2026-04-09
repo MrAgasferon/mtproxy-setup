@@ -250,10 +250,12 @@ write_config() {
   ]},
   {personal_mtproxy, [
     {admin_password, "${admin_pass}"},
-    {base_domain,   "${domain}"},
-    {dets_file,     "/var/lib/personal_mtproxy/proxies.dets"},
-    {ssl_cert,      "/etc/letsencrypt/live/${domain}/fullchain.pem"},
-    {ssl_key,       "/etc/letsencrypt/live/${domain}/privkey.pem"}
+    {vhosts, [
+      #{domain   => "${domain}",
+        ssl_cert => "/var/lib/personal_mtproxy/${domain}/fullchain.pem",
+        ssl_key  => "/var/lib/personal_mtproxy/${domain}/privkey.pem"}
+    ]},
+    {dets_file, "/var/lib/personal_mtproxy/proxies.dets"}
   ]},
   {kernel,
    [{logger_level, info},
