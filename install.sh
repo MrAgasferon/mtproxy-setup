@@ -27,6 +27,26 @@ success() { echo -e "${GREEN}[OK]${NC} $1"; }
 warn()    { echo -e "${YELLOW}[WARN]${NC} $1"; }
 error()   { echo -e "${RED}[ERROR]${NC} $1"; exit 1; }
 
+self_update() {
+    local script_path=$(realpath "$0")
+    info "Проверяем обновления скрипта..."
+    if curl -fsSL https://raw.githubusercontent.com/MrAgasferon/mtproxy-setup/main/install.sh \
+        -o "${script_path}.new" 2>/dev/null; then
+        if ! cmp -s "$script_path" "${script_path}.new"; then
+            mv "${script_path}.new" "$script_path"
+            chmod +x "$script_path"
+            success "Скрипт обновлён, перезапускаем..."
+            exec bash "$script_path" "$@"
+        else
+            rm -f "${script_path}.new"
+            info "Скрипт актуален"
+        fi
+    else
+        rm -f "${script_path}.new"
+        warn "Не удалось проверить обновления скрипта"
+    fi
+}
+
 check_root() {
     [ "$EUID" -eq 0 ] || error "Запустите скрипт от root: sudo bash install.sh"
 }
