@@ -85,6 +85,11 @@ install_erlang() {
         chmod +x /usr/local/bin/kerl
     fi
 
+    # Чистим незавершённые сборки и старые установки
+    kerl delete build $ERLANG_VSN 2>/dev/null || true
+    rm -rf /root/.kerl/builds/$ERLANG_VSN 2>/dev/null || true
+    rm -rf /opt/erlang/$ERLANG_VSN 2>/dev/null || true
+
     info "Собираем Erlang $ERLANG_VSN (займёт 5-10 минут)..."
     KERL_BUILD_BACKEND=git kerl build $ERLANG_VSN $ERLANG_VSN
     kerl install $ERLANG_VSN /opt/erlang/$ERLANG_VSN
