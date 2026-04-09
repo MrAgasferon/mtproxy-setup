@@ -581,6 +581,7 @@ do_install() {
 
     SECRET=$(openssl rand -hex 16)
     info "Сгенерирован секрет прокси: $SECRET"
+    SALT=$(openssl rand -hex 16)
 
     echo ""
     echo "Параметры установки:"
