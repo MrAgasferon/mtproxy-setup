@@ -86,7 +86,6 @@ install_erlang() {
     fi
 
     # Чистим незавершённые сборки и старые установки
-    kerl delete build $ERLANG_VSN 2>/dev/null || true
     rm -rf /root/.kerl/builds/$ERLANG_VSN 2>/dev/null || true
     rm -rf /opt/erlang/$ERLANG_VSN 2>/dev/null || true
 
