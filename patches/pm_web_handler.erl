@@ -25,13 +25,11 @@ handle(Req = #{method := <<"POST">>, path := <<"/api/proxies">>}) ->
         {ok, Subdomain, Port, BaseSecret} ->
             UserSecret = case application:get_env(mtproto_proxy, per_sni_secrets, off) of
                 on ->
-                    Salt = application:get_env(mtproto_proxy, per_sni_secret_salt,
-                                               <<"mtproto-proxy-per-sni-v1">>),
-                    mtp_fake_tls:derive_sni_secret(
-                        binary:decode_hex(string:uppercase(BaseSecret)),
-                        Subdomain, Salt);
+                    {ok, Salt} = application:get_env(mtproto_proxy, per_sni_secret_salt),
+                    SecretBin = binary:decode_hex(string:uppercase(BaseSecret)),
+                    mtp_fake_tls:derive_sni_secret(SecretBin, Subdomain, Salt);
                 _ ->
-                    BaseSecret
+                    binary:decode_hex(string:uppercase(BaseSecret))
             end,
             Secret = iolist_to_binary([<<"ee">>,
                                        string:lowercase(binary:encode_hex(UserSecret)),
