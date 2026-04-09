@@ -474,6 +474,7 @@ do_update() {
     local domain=$(get_domain_from_config)
     local secret=$(grep "secret.*<<" "$cfg" | head -1 | sed 's/.*<<"\(.*\)">>.*/\1/')
     local admin_pass=$(grep "admin_password" "$cfg" | sed 's/.*"\(.*\)".*/\1/')
+    local salt=$(grep 'per_sni_secret_salt' "$cfg" | sed 's/.*<<"\(.*\)">>.*/\1/')
 
     [ -z "$domain" ] && error "Не удалось определить домен из конфига"
 
@@ -485,7 +486,7 @@ do_update() {
     sed -i 's|git@github.com:|https://github.com/|g' rebar.lock
 
     apply_patches "$domain"
-    write_config "$domain" "$secret" "$admin_pass"
+    write_config "$domain" "$secret" "$admin_pass" "$salt"
 
     info "Пересобираем..."
     make
@@ -580,8 +581,8 @@ do_install() {
     [ -z "$ADMIN_PASS" ] && error "Пароль не может быть пустым"
 
     SECRET=$(openssl rand -hex 16)
-    info "Сгенерирован секрет прокси: $SECRET"
     SALT=$(openssl rand -hex 16)
+    info "Сгенерирован секрет прокси: $SECRET"
 
     echo ""
     echo "Параметры установки:"
@@ -606,7 +607,7 @@ do_install() {
 
     clone_repo
     apply_patches "$DOMAIN"
-    write_config "$DOMAIN" "$SECRET" "$ADMIN_PASS"
+    write_config "$DOMAIN" "$SECRET" "$ADMIN_PASS" "$SALT"
     build_and_install
     setup_cron
 
