@@ -52,8 +52,11 @@ install_deps() {
 }
 
 get_latest_erlang_version() {
-    curl -s https://api.github.com/repos/erlang/otp/releases/latest \
+    # Берём последний релиз мажорной ветки 27+
+    curl -s https://api.github.com/repos/erlang/otp/releases \
         | grep '"tag_name"' \
+        | grep '"OTP-2[789]\.' \
+        | head -1 \
         | sed 's/.*"OTP-\([^"]*\)".*/\1/'
 }
 
