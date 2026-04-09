@@ -229,6 +229,7 @@ write_config() {
     local domain=$1
     local secret=$2
     local admin_pass=$3
+    local salt=$4
 
     info "Записываем конфигурацию..."
 
