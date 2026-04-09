@@ -16,6 +16,11 @@ DETS_FILE="/var/lib/personal_mtproxy/proxies.dets"
 LOG_FILE="/var/log/personal_mtproxy/application.log"
 SERVICE="personal_mtproxy"
 
+# Последний проверенный рабочий коммит upstream
+# Обновляй после тестирования новых версий
+STABLE_COMMIT="1b839a6"
+STABLE_DATE="2026-04-09"
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
