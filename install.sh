@@ -641,7 +641,18 @@ COMMAND="${1:-install}"
 
 case "$COMMAND" in
     install)
+        self_update "$@"
         do_install
+        ;;
+    reinstall)
+        self_update "$@"
+        do_reinstall
+        ;;
+    update)
+        self_update "$@"
+        check_root
+        activate_erlang
+        do_update
         ;;
     backup)
         check_root
@@ -650,14 +661,6 @@ case "$COMMAND" in
     restore)
         check_root
         do_restore
-        ;;
-    update)
-        check_root
-        activate_erlang
-        do_update
-        ;;
-    reinstall)
-        do_reinstall
         ;;
     status)
         do_status
