@@ -293,8 +293,7 @@ get_rel_vsn() {
 
 get_domain_from_config() {
     local cfg="$OPT_DIR/releases/$(get_rel_vsn)/sys.config"
-    grep 'domain[[:space:]]*=>' "$cfg" 2>/dev/null \
-        | grep -v 'tls_domain\|admin\|base_domain' \
+    grep 'base_domain' "$cfg" 2>/dev/null \
         | head -1 \
         | sed 's/.*"\(.*\)".*/\1/'
 }
