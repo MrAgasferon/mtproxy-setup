@@ -1,272 +1,507 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MTProxy Admin</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root[data-theme="light"] {
+    --bg: #f8f9fb;
+    --surface: #ffffff;
+    --border: #e5e7eb;
+    --border2: #d1d5db;
+    --text: #111827;
+    --muted: #6b7280;
+    --accent: #111827;
+    --accent-soft: #f3f4f6;
+    --danger: #dc2626;
+    --danger-soft: #fef2f2;
+    --success: #16a34a;
+    --success-soft: #f0fdf4;
+    --card: #ffffff;
+    --stat-bg: #f3f4f6;
+    --nav-active-bg: #111827;
+    --nav-active-text: #ffffff;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --border: #1e2d45;
+    --border2: #2a3a55;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --accent: #00d4ff;
+    --accent-soft: rgba(0,212,255,0.08);
+    --danger: #f87171;
+    --danger-soft: rgba(248,113,113,0.1);
+    --success: #4ade80;
+    --success-soft: rgba(74,222,128,0.1);
+    --card: #131c2e;
+    --stat-bg: #131c2e;
+    --nav-active-bg: #00d4ff;
+    --nav-active-text: #0a0e1a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; min-height: 100vh; }
-  #admin-screen { padding: 2rem; max-width: 1100px; margin: 0 auto; }
-  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
-  .header h1 { font-size: 20px; font-weight: 500; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .layout { max-width: 1100px; margin: 0 auto; padding: 24px; }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  .logo em { color: var(--muted); font-style: normal; font-weight: 400; }
+
   .header-right { display: flex; align-items: center; gap: 12px; }
-  .refresh-hint { font-size: 12px; color: #999; }
-  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 2rem; }
-  .stat { background: #f0f0f0; border-radius: 8px; padding: 1rem; }
-  .stat-label { font-size: 13px; color: #666; margin-bottom: 4px; }
-  .stat-value { font-size: 24px; font-weight: 500; }
-  .create-bar { display: flex; gap: 8px; margin-bottom: 1rem; }
-  .create-bar input { flex: 1; padding: 8px 12px; border: 0.5px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; background: white; }
-  .create-bar input:focus { border-color: #888; }
-  .create-bar button { padding: 8px 16px; background: #1a1a1a; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; white-space: nowrap; }
-  .create-bar button:hover { background: #333; }
-  .search-bar { margin-bottom: 1rem; }
-  .search-bar input { width: 100%; padding: 8px 12px; border: 0.5px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; background: white; }
-  .search-bar input:focus { border-color: #888; }
-  table { width: 100%; background: white; border: 0.5px solid #ddd; border-radius: 12px; border-collapse: collapse; overflow: hidden; font-size: 14px; }
-  thead { background: #f8f8f8; }
-  th { padding: 10px 14px; text-align: left; font-weight: 500; color: #555; border-bottom: 0.5px solid #eee; }
-  td { padding: 10px 14px; border-bottom: 0.5px solid #f0f0f0; vertical-align: middle; }
+
+  .last-update {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .theme-toggle {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.2s;
+    box-shadow: var(--shadow);
+  }
+
+  .theme-toggle:hover { border-color: var(--border2); }
+
+  nav {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 24px;
+  }
+
+  nav a {
+    padding: 7px 14px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--surface);
+    transition: all 0.15s;
+    box-shadow: var(--shadow);
+  }
+
+  nav a:hover { color: var(--text); border-color: var(--border2); }
+
+  nav a.active {
+    background: var(--nav-active-bg);
+    color: var(--nav-active-text);
+    border-color: var(--nav-active-bg);
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat {
+    background: var(--stat-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .stat-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+  .stat-value { font-size: 26px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .toolbar input {
+    flex: 1;
+    padding: 9px 13px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+    box-shadow: var(--shadow);
+  }
+
+  .toolbar input:focus { border-color: var(--border2); }
+  .toolbar input::placeholder { color: var(--muted); }
+
+  .btn-primary {
+    padding: 9px 16px;
+    background: var(--nav-active-bg);
+    color: var(--nav-active-text);
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+  }
+
+  .btn-primary:hover { opacity: 0.85; }
+
+  .search-wrap { margin-bottom: 14px; }
+
+  .search-wrap input {
+    width: 100%;
+    padding: 9px 13px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+    box-shadow: var(--shadow);
+    transition: border-color 0.15s;
+  }
+
+  .search-wrap input:focus { border-color: var(--border2); }
+  .search-wrap input::placeholder { color: var(--muted); }
+
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+
+  thead { background: var(--stat-bg); }
+
+  th {
+    padding: 11px 14px;
+    text-align: left;
+    font-weight: 500;
+    font-size: 12px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
   tr:last-child td { border-bottom: none; }
-  tr:hover td { background: #fafafa; }
-  .subdomain { font-family: monospace; font-size: 13px; color: #333; }
-  .email { color: #555; }
-  .date { color: #888; font-size: 13px; white-space: nowrap; }
-  .conn-cell { display: flex; align-items: center; gap: 8px; min-width: 60px; }
-  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .dot-green { background: #27ae60; box-shadow: 0 0 0 3px rgba(39,174,96,0.2); }
-  .dot-red { background: #ccc; }
-  .conn-count { font-size: 13px; font-weight: 500; color: #aaa; }
-  .conn-count.active { color: #27ae60; }
-  .actions { display: flex; gap: 6px; flex-wrap: wrap; }
-  .copy-btn { padding: 4px 10px; border: 0.5px solid #aaa; color: #333; background: transparent; border-radius: 6px; font-size: 12px; cursor: pointer; white-space: nowrap; }
-  .copy-btn:hover { background: #f0f0f0; }
-  .copy-btn.copied { border-color: #27ae60; color: #27ae60; }
-  .revoke-btn { padding: 4px 10px; border: 0.5px solid #e74c3c; color: #e74c3c; background: transparent; border-radius: 6px; font-size: 12px; cursor: pointer; white-space: nowrap; }
-  .revoke-btn:hover { background: #fdf0f0; }
+  tr:hover td { background: var(--accent-soft); }
+
+  .subdomain {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+  }
+
+  .email { color: var(--muted); font-size: 13px; }
+  .date { color: var(--muted); font-size: 12px; white-space: nowrap; }
+
+  .conn-cell { display: flex; align-items: center; gap: 7px; }
+
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-on { background: var(--success); box-shadow: 0 0 0 3px var(--success-soft); }
+  .dot-off { background: var(--border2); }
+
+  .conn-count { font-size: 13px; font-weight: 600; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .conn-count.on { color: var(--success); }
+
+  .actions { display: flex; gap: 5px; flex-wrap: wrap; }
+
+  .copy-btn {
+    padding: 4px 9px;
+    border: 1px solid var(--border2);
+    color: var(--muted);
+    background: transparent;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .copy-btn:hover { color: var(--text); border-color: var(--text); }
+  .copy-btn.ok { border-color: var(--success); color: var(--success); }
+
+  .revoke-btn {
+    padding: 4px 9px;
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    background: transparent;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .revoke-btn:hover { background: var(--danger-soft); }
   .revoke-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .empty { text-align: center; padding: 3rem; color: #999; font-size: 14px; }
-  .loading { text-align: center; padding: 2rem; color: #999; }
-  .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #1a1a1a; color: white; padding: 10px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 100; }
+
+  .empty {
+    padding: 48px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .loading { padding: 48px; text-align: center; color: var(--muted); }
+
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: var(--bg);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 100;
+  }
+
   .toast.show { opacity: 1; }
 </style>
 </head>
 <body>
-
-<div id="admin-screen">
-  <div class="header">
-    <h1>MTProxy Admin</h1>
+<div class="layout">
+  <header>
+    <div class="logo">MTProxy <em>/ панель</em></div>
     <div class="header-right">
-      <span class="refresh-hint" id="last-update"></span>
+      <span class="last-update" id="last-update"></span>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">🌙</button>
     </div>
-  </div>
+  </header>
+
+  <nav>
+    <a href="/admin.html" class="active">Панель</a>
+    <a href="/metrics.html">Метрики</a>
+  </nav>
 
   <div class="stats">
-    <div class="stat">
-      <div class="stat-label">Всего пользователей</div>
-      <div class="stat-value" id="stat-total">—</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Сейчас онлайн</div>
-      <div class="stat-value" id="stat-online">—</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Активных соединений</div>
-      <div class="stat-value" id="stat-conns">—</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Показано (фильтр)</div>
-      <div class="stat-value" id="stat-filtered">—</div>
-    </div>
+    <div class="stat"><div class="stat-label">Всего пользователей</div><div class="stat-value" id="stat-total">—</div></div>
+    <div class="stat"><div class="stat-label">Сейчас онлайн</div><div class="stat-value" id="stat-online">—</div></div>
+    <div class="stat"><div class="stat-label">Активных соединений</div><div class="stat-value" id="stat-conns">—</div></div>
+    <div class="stat"><div class="stat-label">Показано (фильтр)</div><div class="stat-value" id="stat-filtered">—</div></div>
   </div>
 
-  <div class="create-bar">
+  <div class="toolbar">
     <input type="text" id="new-email" placeholder="Email нового пользователя (необязательно)" />
-    <button onclick="createProxy()">+ Создать прокси</button>
+    <button class="btn-primary" onclick="createProxy()">+ Создать прокси</button>
   </div>
 
-  <div class="search-bar">
+  <div class="search-wrap">
     <input type="text" id="search-input" placeholder="Поиск по email или subdomain..." oninput="renderTable()" />
   </div>
 
-  <div id="table-container"><div class="loading">Загрузка...</div></div>
+  <div class="table-wrap" id="table-container"><div class="loading">Загрузка...</div></div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-let allEntries = [];
-let proxyConfig = {};
-let connections = {};
+  // Theme
+  const saved = localStorage.getItem('mtproxy-theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  document.getElementById('theme-btn').textContent = saved === 'dark' ? '☀️' : '🌙';
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
-}
-
-function buildSecret(baseSecret, subdomain) {
-  const enc = new TextEncoder();
-  const subBytes = enc.encode(subdomain);
-  const hex = Array.from(subBytes).map(b => b.toString(16).padStart(2, '0')).join('');
-  return 'ee' + baseSecret + hex;
-}
-
-function buildLinks(entry) {
-  const secret = buildSecret(proxyConfig.secret, entry.subdomain);
-  const params = new URLSearchParams({
-    server: proxyConfig.base_domain,
-    port: String(proxyConfig.port),
-    secret: secret
-  });
-  return {
-    tme: 'https://t.me/proxy?' + params.toString(),
-    tg: 'tg://proxy?' + params.toString(),
-    secret: secret
-  };
-}
-
-function updateStats(connList) {
-  const totalConns = connList.reduce((s, c) => s + c.connections, 0);
-  const online = connList.filter(c => c.connections > 0).length;
-  document.getElementById('stat-online').textContent = online;
-  document.getElementById('stat-conns').textContent = totalConns;
-  document.getElementById('last-update').textContent = 'обновлено ' + new Date().toLocaleTimeString('ru-RU');
-}
-
-async function loadData() {
-  try {
-    const [cfgResp, listResp, connResp] = await Promise.all([
-      fetch('/api/config'),
-      fetch('/api/proxies'),
-      fetch('/api/connections')
-    ]);
-    proxyConfig = await cfgResp.json();
-    allEntries = await listResp.json();
-    const connList = await connResp.json();
-    connections = {};
-    connList.forEach(c => { connections[c.subdomain] = c.connections; });
-    updateStats(connList);
-    document.getElementById('stat-total').textContent = allEntries.length;
-    renderTable();
-  } catch(e) {
-    document.getElementById('table-container').innerHTML = '<div class="empty">Ошибка загрузки данных</div>';
+  function toggleTheme() {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('mtproxy-theme', next);
+    document.getElementById('theme-btn').textContent = next === 'dark' ? '☀️' : '🌙';
   }
-}
 
-async function refreshConnections() {
-  try {
-    const connResp = await fetch('/api/connections');
-    const connList = await connResp.json();
-    connections = {};
-    connList.forEach(c => { connections[c.subdomain] = c.connections; });
-    updateStats(connList);
-    renderTable();
-  } catch(e) {}
-}
+  let allEntries = [], proxyConfig = {}, connections = {};
 
-setInterval(refreshConnections, 10000);
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
 
-async function createProxy() {
-  const email = document.getElementById('new-email').value.trim();
-  const body = email ? 'email=' + encodeURIComponent(email) : '';
-  try {
-    const resp = await fetch('/api/proxies', { method: 'POST', body });
-    const data = await resp.json();
-    if (data.subdomain) {
-      document.getElementById('new-email').value = '';
-      showToast('Прокси создан: ' + data.subdomain);
-      await loadData();
-    } else {
-      alert('Ошибка: ' + JSON.stringify(data));
+  function buildSecret(baseSecret, subdomain) {
+    const enc = new TextEncoder();
+    const hex = Array.from(enc.encode(subdomain)).map(b => b.toString(16).padStart(2,'0')).join('');
+    return 'ee' + baseSecret + hex;
+  }
+
+  function buildLinks(entry) {
+    const secret = buildSecret(proxyConfig.secret, entry.subdomain);
+    const params = new URLSearchParams({ server: proxyConfig.base_domain, port: String(proxyConfig.port), secret });
+    return { tme: 'https://t.me/proxy?' + params, tg: 'tg://proxy?' + params, secret };
+  }
+
+  function updateStats(connList) {
+    const totalConns = connList.reduce((s, c) => s + c.connections, 0);
+    const online = connList.filter(c => c.connections > 0).length;
+    document.getElementById('stat-online').textContent = online;
+    document.getElementById('stat-conns').textContent = totalConns;
+    document.getElementById('last-update').textContent = 'обновлено ' + new Date().toLocaleTimeString('ru-RU');
+  }
+
+  async function loadData() {
+    try {
+      const [cfgR, listR, connR] = await Promise.all([fetch('/api/config'), fetch('/api/proxies'), fetch('/api/connections')]);
+      proxyConfig = await cfgR.json();
+      allEntries = await listR.json();
+      const connList = await connR.json();
+      connections = {};
+      connList.forEach(c => { connections[c.subdomain] = c.connections; });
+      updateStats(connList);
+      document.getElementById('stat-total').textContent = allEntries.length;
+      renderTable();
+    } catch(e) {
+      document.getElementById('table-container').innerHTML = '<div class="empty">Ошибка загрузки данных</div>';
     }
-  } catch(e) {
-    alert('Ошибка сети');
-  }
-}
-
-function copyText(text, btn) {
-  navigator.clipboard.writeText(text).then(() => {
-    const orig = btn.textContent;
-    btn.textContent = 'Скопировано';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1500);
-  });
-}
-
-function renderTable() {
-  const q = document.getElementById('search-input').value.toLowerCase();
-  const filtered = allEntries.filter(e =>
-    (e.subdomain || '').toLowerCase().includes(q) ||
-    (e.email || '').toLowerCase().includes(q)
-  );
-  document.getElementById('stat-filtered').textContent = filtered.length;
-
-  if (filtered.length === 0) {
-    document.getElementById('table-container').innerHTML = '<div class="empty">Ничего не найдено</div>';
-    return;
   }
 
-  const rows = filtered.map(e => {
-    const fullSub = e.subdomain || '';
-    const date = e.registered_at ? new Date(e.registered_at * 1000).toLocaleDateString('ru-RU') : '—';
-    const conns = connections[fullSub] || 0;
-    const dotClass = conns > 0 ? 'dot-green' : 'dot-red';
-    const countClass = conns > 0 ? 'active' : '';
-    const connHtml = `<div class="conn-cell"><div class="dot ${dotClass}"></div><span class="conn-count ${countClass}">${conns}</span></div>`;
-    const links = proxyConfig.secret ? buildLinks(e) : null;
-    const tme = links ? links.tme.replace(/'/g, "\\'") : '';
-    const tg = links ? links.tg.replace(/'/g, "\\'") : '';
-    const sec = links ? links.secret : '';
-    const linkBtns = links ? `
-      <button class="copy-btn" onclick="copyText('${tme}', this)">t.me</button>
-      <button class="copy-btn" onclick="copyText('${tg}', this)">tg://</button>
-      <button class="copy-btn" onclick="copyText('${sec}', this)">Секрет</button>
-    ` : '';
-    const escapedSub = fullSub.replace(/'/g, "\\'");
-    return `<tr>
-      <td>${connHtml}</td>
-      <td class="subdomain">${fullSub}</td>
-      <td class="email">${e.email || '<span style="color:#bbb">—</span>'}</td>
-      <td class="date">${date}</td>
-      <td><div class="actions">${linkBtns}<button class="revoke-btn" onclick="revoke('${escapedSub}', this)">Отозвать</button></div></td>
-    </tr>`;
-  }).join('');
+  async function refreshConnections() {
+    try {
+      const connList = await (await fetch('/api/connections')).json();
+      connections = {};
+      connList.forEach(c => { connections[c.subdomain] = c.connections; });
+      updateStats(connList);
+      renderTable();
+    } catch(e) {}
+  }
 
-  document.getElementById('table-container').innerHTML = `
-    <table>
+  setInterval(refreshConnections, 10000);
+
+  async function createProxy() {
+    const email = document.getElementById('new-email').value.trim();
+    const body = email ? 'email=' + encodeURIComponent(email) : '';
+    try {
+      const data = await (await fetch('/api/proxies', { method: 'POST', body })).json();
+      if (data.subdomain) {
+        document.getElementById('new-email').value = '';
+        showToast('Прокси создан: ' + data.subdomain);
+        await loadData();
+      } else { alert('Ошибка: ' + JSON.stringify(data)); }
+    } catch(e) { alert('Ошибка сети'); }
+  }
+
+  function copyText(text, btn) {
+    navigator.clipboard.writeText(text).then(() => {
+      const orig = btn.textContent;
+      btn.textContent = 'Скопировано';
+      btn.classList.add('ok');
+      setTimeout(() => { btn.textContent = orig; btn.classList.remove('ok'); }, 1500);
+    });
+  }
+
+  function renderTable() {
+    const q = document.getElementById('search-input').value.toLowerCase();
+    const filtered = allEntries.filter(e => (e.subdomain||'').toLowerCase().includes(q) || (e.email||'').toLowerCase().includes(q));
+    document.getElementById('stat-filtered').textContent = filtered.length;
+
+    if (!filtered.length) {
+      document.getElementById('table-container').innerHTML = '<div class="empty">Ничего не найдено</div>';
+      return;
+    }
+
+    const rows = filtered.map(e => {
+      const date = e.registered_at ? new Date(e.registered_at * 1000).toLocaleDateString('ru-RU') : '—';
+      const conns = connections[e.subdomain] || 0;
+      const links = proxyConfig.secret ? buildLinks(e) : null;
+      const tme = links ? links.tme.replace(/'/g,"\\'") : '';
+      const tg = links ? links.tg.replace(/'/g,"\\'") : '';
+      const sec = links ? links.secret : '';
+      const sub = (e.subdomain||'').replace(/'/g,"\\'");
+      return `<tr>
+        <td><div class="conn-cell"><div class="dot ${conns>0?'dot-on':'dot-off'}"></div><span class="conn-count ${conns>0?'on':''}">${conns}</span></div></td>
+        <td class="subdomain">${e.subdomain||''}</td>
+        <td class="email">${e.email||'<span style="color:var(--border2)">—</span>'}</td>
+        <td class="date">${date}</td>
+        <td><div class="actions">
+          ${links?`<button class="copy-btn" onclick="copyText('${tme}',this)">t.me</button>
+          <button class="copy-btn" onclick="copyText('${tg}',this)">tg://</button>
+          <button class="copy-btn" onclick="copyText('${sec}',this)">Секрет</button>`:''}
+          <button class="revoke-btn" onclick="revoke('${sub}',this)">Отозвать</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('table-container').innerHTML = `<table>
       <thead><tr><th>Онлайн</th><th>Subdomain</th><th>Email</th><th>Дата</th><th>Действия</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
-}
-
-async function revoke(fullSubdomain, btn) {
-  const short = fullSubdomain.split('.')[0];
-  if (!confirm('Отозвать доступ для ' + short + '?')) return;
-  btn.disabled = true;
-  btn.textContent = '...';
-  try {
-    const resp = await fetch('/api/proxies?subdomain=' + encodeURIComponent(fullSubdomain), { method: 'DELETE' });
-    if (resp.ok) {
-      allEntries = allEntries.filter(e => e.subdomain !== fullSubdomain);
-      document.getElementById('stat-total').textContent = allEntries.length;
-      showToast('Доступ отозван: ' + short);
-      renderTable();
-    } else {
-      btn.disabled = false;
-      btn.textContent = 'Отозвать';
-      alert('Ошибка при отзыве');
-    }
-  } catch(e) {
-    btn.disabled = false;
-    btn.textContent = 'Отозвать';
-    alert('Ошибка сети');
   }
-}
 
-loadData();
+  async function revoke(sub, btn) {
+    if (!confirm('Отозвать доступ для ' + sub.split('.')[0] + '?')) return;
+    btn.disabled = true; btn.textContent = '...';
+    try {
+      const r = await fetch('/api/proxies?subdomain=' + encodeURIComponent(sub), { method: 'DELETE' });
+      if (r.ok) {
+        allEntries = allEntries.filter(e => e.subdomain !== sub);
+        document.getElementById('stat-total').textContent = allEntries.length;
+        showToast('Доступ отозван');
+        renderTable();
+      } else { btn.disabled = false; btn.textContent = 'Отозвать'; alert('Ошибка'); }
+    } catch(e) { btn.disabled = false; btn.textContent = 'Отозвать'; alert('Ошибка сети'); }
+  }
+
+  loadData();
 </script>
 </body>
 </html>
