@@ -225,6 +225,8 @@ apply_patches() {
         -o "$INSTALL_DIR/priv/htdocs/admin.html"
     curl -fsSL "$PATCHES_URL/htdocs/index.html" \
         -o "$INSTALL_DIR/priv/htdocs/index.html"
+    curl -fsSL "$PATCHES_URL/htdocs/metrics.html" \
+        -o "$INSTALL_DIR/priv/htdocs/metrics.html"
 
     sed -i "s|example.com|$domain|g" "$INSTALL_DIR/priv/htdocs/index.html"
 
