@@ -580,15 +580,9 @@ do_install() {
 
     read -rp "Ваш домен (например example.com): " DOMAIN
     [ -z "$DOMAIN" ] && error "Домен не может быть пустым"
-
-    echo ""
-    echo "Тип домена:"
-    echo "  1) DuckDNS (бесплатный поддомен)"
-    echo "  2) Собственный домен"
-    read -rp "Выберите [1/2]: " DOMAIN_TYPE
-
+    
     DUCKDNS_TOKEN=""
-    if [ "$DOMAIN_TYPE" = "1" ]; then
+    if [[ "$DOMAIN" == *.duckdns.org ]]; then
         read -rp "DuckDNS Token: " DUCKDNS_TOKEN
         [ -z "$DUCKDNS_TOKEN" ] && error "Token не может быть пустым"
     fi
@@ -618,7 +612,7 @@ do_install() {
     install_rebar3
     install_certbot
 
-    if [ "$DOMAIN_TYPE" = "1" ]; then
+    if [[ "$DOMAIN" == *.duckdns.org ]]; then
         get_certificate_duckdns "$DOMAIN" "$DUCKDNS_TOKEN" "$CERT_EMAIL"
     else
         get_certificate_http "$DOMAIN" "$CERT_EMAIL"
