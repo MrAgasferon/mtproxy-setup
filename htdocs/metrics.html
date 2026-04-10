@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTProxy — Метрики</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --border: #1e2d45;
+    --accent: #00d4ff;
+    --accent2: #00ff88;
+    --accent3: #ff6b35;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --card: #131c2e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(0,212,255,0.05) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, rgba(0,255,136,0.03) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+
+  .logo span { color: var(--muted); font-weight: 400; }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent2);
+    box-shadow: 0 0 8px var(--accent2);
+    animation: pulse 2s infinite;
+    display: inline-block;
+    margin-right: 8px;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .refresh-info {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .nav {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+
+  .nav a {
+    padding: 8px 16px;
+    border-radius: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+
+  .nav a:hover, .nav a.active {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: rgba(0,212,255,0.05);
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent-color, var(--accent));
+    opacity: 0.7;
+  }
+
+  .card:hover { border-color: var(--accent); }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  .card-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--accent-color, var(--accent));
+    line-height: 1;
+  }
+
+  .card-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .section-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .dc-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+  }
+
+  .dc-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .dc-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent2);
+  }
+
+  .dc-label {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .memory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .mem-row {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .mem-label {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .mem-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .error {
+    background: rgba(255,107,53,0.1);
+    border: 1px solid rgba(255,107,53,0.3);
+    border-radius: 8px;
+    padding: 16px;
+    color: var(--accent3);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+
+  .loading {
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 40px;
+    text-align: center;
+  }
+
+  footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="logo">MTProxy <span>/ метрики</span></div>
+    <div class="refresh-info">
+      <span class="status-dot"></span>
+      <span id="last-update">загрузка...</span>
+    </div>
+  </header>
+
+  <nav class="nav">
+    <a href="/admin.html">Панель</a>
+    <a href="/metrics.html" class="active">Метрики</a>
+  </nav>
+
+  <div id="content"><div class="loading">загрузка метрик...</div></div>
+
+  <footer>
+    <span>MTProxy metrics</span>
+    <span id="footer-time"></span>
+  </footer>
+</div>
+
+<script>
+  function getMetric(data, name) {
+    const m = data.find(d => d.name === name);
+    return m ? parseFloat(m.value) : 0;
+  }
+
+  function getMetricsByPrefix(data, prefix) {
+    return data.filter(d => d.name.startsWith(prefix));
+  }
+
+  function parseDC(name) {
+    const m = name.match(/dc="(-?\d+)"/);
+    return m ? m[1] : name;
+  }
+
+  function formatBytes(bytes) {
+    if (bytes > 1024*1024) return (bytes/1024/1024).toFixed(1) + ' MB';
+    if (bytes > 1024) return (bytes/1024).toFixed(1) + ' KB';
+    return bytes + ' B';
+  }
+
+  async function loadMetrics() {
+    try {
+      const r = await fetch('/api/metrics');
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const data = await r.json();
+
+      const connections = getMetric(data, 'mtproto_proxy_connections_count{listener="mtp_ipv4"}');
+      const users = getMetric(data, 'personal_mtproxy_registered_subdomains');
+      const inTotal = getMetric(data, 'mtproto_proxy_in_connection_total{listener="mtp_ipv4"}');
+      const errors = getMetric(data, 'mtproto_proxy_protocol_error_total{listener="mtp_ipv4",reason="tls_invalid_digest"}');
+      const processes = getMetric(data, 'erlang_vm_process_count');
+      const memSystem = getMetric(data, 'erlang_vm_memory_bytes_total{kind="system"}');
+      const memProc = getMetric(data, 'erlang_vm_memory_bytes_total{kind="processes"}');
+      const rxBytes = getMetric(data, 'mtproto_proxy_received_upstream_bytes{listener="mtp_ipv4"}');
+
+      // DC upstreams
+      const upstreams = getMetricsByPrefix(data, 'mtproto_proxy_dc_num_upstreams')
+        .filter(d => !d.name.includes('-'))
+        .filter(d => d.name.match(/dc="(\d+)"/));
+
+      const html = `
+        <div class="cards">
+          <div class="card" style="--accent-color: var(--accent)">
+            <div class="card-label">Активных соединений</div>
+            <div class="card-value">${connections}</div>
+            <div class="card-sub">всего за сессию: ${inTotal}</div>
+          </div>
+          <div class="card" style="--accent-color: var(--accent2)">
+            <div class="card-label">Пользователей</div>
+            <div class="card-value">${users}</div>
+            <div class="card-sub">зарегистрировано субдоменов</div>
+          </div>
+          <div class="card" style="--accent-color: var(--accent3)">
+            <div class="card-label">Ошибок TLS</div>
+            <div class="card-value">${errors}</div>
+            <div class="card-sub">invalid digest</div>
+          </div>
+          <div class="card" style="--accent-color: #a78bfa">
+            <div class="card-label">Трафик (вх.)</div>
+            <div class="card-value" style="font-size:22px">${formatBytes(rxBytes)}</div>
+            <div class="card-sub">получено от Telegram</div>
+          </div>
+        </div>
+
+        <div class="section-title">Соединения к DC Telegram</div>
+        <div class="dc-grid">
+          ${upstreams.map(m => {
+            const dc = parseDC(m.name);
+            const downs = getMetric(data, `mtproto_proxy_dc_num_downstreams{dc="${dc}"}`);
+            return `
+              <div class="dc-card">
+                <div class="dc-name">DC ${dc}</div>
+                <div class="dc-val">${m.value}</div>
+                <div class="dc-label">up / ${downs} down</div>
+              </div>`;
+          }).join('')}
+        </div>
+
+        <div class="section-title">Erlang VM</div>
+        <div class="memory-grid">
+          <div class="mem-row">
+            <span class="mem-label">Процессов</span>
+            <span class="mem-val">${processes}</span>
+          </div>
+          <div class="mem-row">
+            <span class="mem-label">Память системы</span>
+            <span class="mem-val">${formatBytes(memSystem)}</span>
+          </div>
+          <div class="mem-row">
+            <span class="mem-label">Память процессов</span>
+            <span class="mem-val">${formatBytes(memProc)}</span>
+          </div>
+          <div class="mem-row">
+            <span class="mem-label">ETS таблиц</span>
+            <span class="mem-val">${getMetric(data, 'erlang_vm_memory_ets_tables')}</span>
+          </div>
+          <div class="mem-row">
+            <span class="mem-label">Планировщиков</span>
+            <span class="mem-val">${getMetric(data, 'erlang_vm_schedulers_online')}</span>
+          </div>
+          <div class="mem-row">
+            <span class="mem-label">GC runs</span>
+            <span class="mem-val">${getMetric(data, 'erlang_vm_statistics_garbage_collection_number_of_gcs')}</span>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('content').innerHTML = html;
+      const now = new Date();
+      document.getElementById('last-update').textContent = 'обновлено ' + now.toLocaleTimeString('ru');
+      document.getElementById('footer-time').textContent = now.toLocaleDateString('ru');
+
+    } catch(e) {
+      document.getElementById('content').innerHTML = `<div class="error">Ошибка загрузки метрик: ${e.message}</div>`;
+    }
+  }
+
+  loadMetrics();
+  setInterval(loadMetrics, 10000);
+</script>
+</body>
+</html>
