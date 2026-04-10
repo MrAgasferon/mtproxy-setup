@@ -568,6 +568,47 @@ do_status() {
     echo ""
 }
 
+do_cleanup() {
+    check_root
+    if [ ! -d "$BACKUP_DIR" ] || [ -z "$(ls -A $BACKUP_DIR 2>/dev/null)" ]; then
+        info "Резервных копий нет"
+        return
+    fi
+
+    local count=$(ls "$BACKUP_DIR" | wc -l)
+    echo ""
+    echo "Резервных копий: $count"
+    ls -lh "$BACKUP_DIR" | tail -n +2 | awk '{print "  " $NF, $5}'
+    echo ""
+    echo "Варианты очистки:"
+    echo "  1) Удалить все бэкапы"
+    echo "  2) Оставить только последние N"
+    echo "  3) Отмена"
+    read -rp "Выберите [1/2/3]: " CHOICE
+
+    if [ "$CHOICE" = "1" ]; then
+        read -rp "Удалить все $count бэкапов? [y/N]: " CONFIRM
+        [[ "$CONFIRM" =~ ^[Yy]$ ]] || { info "Отменено"; return; }
+        rm -rf "$BACKUP_DIR"/*
+        success "Все бэкапы удалены"
+    elif [ "$CHOICE" = "2" ]; then
+        read -rp "Сколько последних оставить: " KEEP
+        [[ "$KEEP" =~ ^[0-9]+$ ]] || { error "Введите число"; }
+        local to_delete=$(ls -r "$BACKUP_DIR" | tail -n +$((KEEP+1)))
+        if [ -z "$to_delete" ]; then
+            info "Нечего удалять — бэкапов не больше $KEEP"
+            return
+        fi
+        echo "$to_delete" | while read d; do
+            rm -rf "$BACKUP_DIR/$d"
+            info "Удалён: $d"
+        done
+        success "Готово, оставлено: $KEEP"
+    else
+        info "Отменено"
+    fi
+}
+
 do_install() {
     check_root
     check_os
@@ -691,6 +732,10 @@ case "$COMMAND" in
         check_root
         do_restore
         ;;
+    cleanup)
+        check_root
+        do_cleanup
+        ;;
     status)
         do_status
         ;;
@@ -700,6 +745,7 @@ case "$COMMAND" in
         echo "  install  — установка с нуля"
         echo "  backup   — создать резервную копию"
         echo "  restore  — восстановить из резервной копии"
+        echo "  cleanup  — управление резервными копиями"
         echo "  update   — обновить до последней версии"
         echo "  reinstall — удалить и установить заново"
         echo "  status   — показать состояние сервиса"
