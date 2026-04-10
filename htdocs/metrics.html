@@ -14,7 +14,6 @@
     --border2: #d1d5db;
     --text: #111827;
     --muted: #6b7280;
-    --accent: #111827;
     --accent-soft: #f3f4f6;
     --card: #ffffff;
     --stat-bg: #f3f4f6;
@@ -25,6 +24,7 @@
     --c2: #16a34a;
     --c3: #dc2626;
     --c4: #7c3aed;
+    --c5: #0891b2;
   }
 
   :root[data-theme="dark"] {
@@ -34,7 +34,6 @@
     --border2: #2a3a55;
     --text: #e2e8f0;
     --muted: #64748b;
-    --accent: #00d4ff;
     --accent-soft: rgba(0,212,255,0.08);
     --card: #131c2e;
     --stat-bg: #131c2e;
@@ -45,6 +44,7 @@
     --c2: #00ff88;
     --c3: #ff6b35;
     --c4: #a78bfa;
+    --c5: #22d3ee;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -54,7 +54,7 @@
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    padding: 24px;
+    padding: 20px;
     transition: background 0.2s, color 0.2s;
   }
 
@@ -64,22 +64,21 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 24px;
-    padding-bottom: 20px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
     border-bottom: 1px solid var(--border);
   }
 
   .logo {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
     color: var(--text);
-    letter-spacing: -0.5px;
   }
 
   .logo em { color: var(--muted); font-style: normal; font-weight: 400; }
 
-  .header-right { display: flex; align-items: center; gap: 12px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
 
   .pulse {
     width: 8px; height: 8px;
@@ -100,7 +99,7 @@
   }
 
   .theme-toggle {
-    width: 36px; height: 36px;
+    width: 34px; height: 34px;
     border-radius: 8px;
     border: 1px solid var(--border);
     background: var(--surface);
@@ -108,17 +107,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
-    transition: all 0.2s;
+    font-size: 15px;
     box-shadow: var(--shadow);
   }
-
-  .theme-toggle:hover { border-color: var(--border2); }
 
   nav {
     display: flex;
     gap: 6px;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
   }
 
   nav a {
@@ -144,20 +140,19 @@
 
   .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 14px;
-    margin-bottom: 28px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
   }
 
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 20px;
+    padding: 18px;
     position: relative;
     overflow: hidden;
     box-shadow: var(--shadow);
-    transition: border-color 0.15s;
   }
 
   .card::before {
@@ -168,8 +163,6 @@
     background: var(--card-color);
     opacity: 0.8;
   }
-
-  .card:hover { border-color: var(--border2); }
 
   .card-label {
     font-size: 11px;
@@ -182,7 +175,7 @@
 
   .card-value {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 32px;
+    font-size: 30px;
     font-weight: 700;
     color: var(--card-color);
     line-height: 1;
@@ -208,9 +201,9 @@
 
   .dc-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 10px;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
   }
 
   .dc-card {
@@ -240,9 +233,9 @@
 
   .mem-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
     gap: 10px;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
   }
 
   .mem-row {
@@ -292,6 +285,12 @@
     font-family: 'JetBrains Mono', monospace;
     display: flex;
     justify-content: space-between;
+  }
+
+  @media (max-width: 640px) {
+    body { padding: 14px; }
+    .cards { grid-template-columns: repeat(2, 1fr); }
+    .card-value { font-size: 24px; }
   }
 </style>
 </head>
@@ -353,30 +352,41 @@
 
   async function load() {
     try {
-      const r = await fetch('/api/metrics');
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      const data = await r.json();
+      const [metricsR, connR] = await Promise.all([
+        fetch('/api/metrics'),
+        fetch('/api/connections')
+      ]);
+      const data = await metricsR.json();
+      const connList = await connR.json();
 
-      const conns = get(data, 'mtproto_proxy_connections_count{listener="mtp_ipv4"}');
-      const users = get(data, 'personal_mtproxy_registered_subdomains');
-      const total = get(data, 'mtproto_proxy_in_connection_total{listener="mtp_ipv4"}');
-      const errs  = get(data, 'mtproto_proxy_protocol_error_total{listener="mtp_ipv4",reason="tls_invalid_digest"}');
-      const procs = get(data, 'erlang_vm_process_count');
-      const memSys = get(data, 'erlang_vm_memory_bytes_total{kind="system"}');
-      const memPrc = get(data, 'erlang_vm_memory_bytes_total{kind="processes"}');
-      const rx    = get(data, 'mtproto_proxy_received_upstream_bytes{listener="mtp_ipv4"}');
+      const userConns = connList.reduce((s, c) => s + c.connections, 0);
+      const userOnline = connList.filter(c => c.connections > 0).length;
+
+      const tcpConns = get(data, 'mtproto_proxy_connections_count{listener="mtp_ipv4"}');
+      const users    = get(data, 'personal_mtproxy_registered_subdomains');
+      const total    = get(data, 'mtproto_proxy_in_connection_total{listener="mtp_ipv4"}');
+      const errs     = get(data, 'mtproto_proxy_protocol_error_total{listener="mtp_ipv4",reason="tls_invalid_digest"}');
+      const procs    = get(data, 'erlang_vm_process_count');
+      const memSys   = get(data, 'erlang_vm_memory_bytes_total{kind="system"}');
+      const memPrc   = get(data, 'erlang_vm_memory_bytes_total{kind="processes"}');
+      const rx       = get(data, 'mtproto_proxy_received_upstream_bytes{listener="mtp_ipv4"}');
 
       const ups = byPrefix(data, 'mtproto_proxy_dc_num_upstreams')
         .filter(d => d.name.match(/dc="(\d+)"/));
 
       const html = `
         <div class="cards">
-          <div class="card" style="--card-color:var(--c1)">
-            <div class="card-label">Активных соединений</div>
-            <div class="card-value">${conns}</div>
+          <div class="card" style="--card-color:var(--c2)">
+            <div class="card-label">Пользователей онлайн</div>
+            <div class="card-value">${userOnline}</div>
+            <div class="card-sub">активных соединений: ${userConns}</div>
+          </div>
+          <div class="card" style="--card-color:var(--c5)">
+            <div class="card-label">TCP соединений</div>
+            <div class="card-value">${tcpConns}</div>
             <div class="card-sub">всего за сессию: ${total}</div>
           </div>
-          <div class="card" style="--card-color:var(--c2)">
+          <div class="card" style="--card-color:var(--c1)">
             <div class="card-label">Пользователей</div>
             <div class="card-value">${users}</div>
             <div class="card-sub">зарегистрированных субдоменов</div>
@@ -388,7 +398,7 @@
           </div>
           <div class="card" style="--card-color:var(--c4)">
             <div class="card-label">Трафик входящий</div>
-            <div class="card-value" style="font-size:24px">${fmtBytes(rx)}</div>
+            <div class="card-value" style="font-size:22px">${fmtBytes(rx)}</div>
             <div class="card-sub">получено от Telegram</div>
           </div>
         </div>
