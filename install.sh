@@ -258,14 +258,17 @@ write_config() {
     {policy, [
       {in_table, tls_domain, personal_domains},
       {max_connections, [tls_domain], 100}
-    ]}
+    ]},
+    {metric_backend, pm_prometheus}
   ]},
   {personal_mtproxy, [
     {admin_password, "${admin_pass}"},
     {base_domain,   "${domain}"},
     {dets_file,     "/var/lib/personal_mtproxy/proxies.dets"},
     {ssl_cert,      "/var/lib/personal_mtproxy/${domain}/fullchain.pem"},
-    {ssl_key,       "/var/lib/personal_mtproxy/${domain}/privkey.pem"}
+    {ssl_key,       "/var/lib/personal_mtproxy/${domain}/privkey.pem"},
+    {metrics_listen_ip,   "127.0.0.1"},
+    {metrics_listen_port, 9091}
   ]},
   {kernel,
    [{logger_level, info},
