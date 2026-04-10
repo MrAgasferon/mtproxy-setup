@@ -40,23 +40,12 @@ needs_auth(_) -> false.
 check_auth(Req) ->
     {ok, AdminPass} = application:get_env(personal_mtproxy, admin_password),
     AdminPassBin = list_to_binary(AdminPass),
-    Headers = cowboy_req:headers(Req),
-    case maps:get(<<"authorization">>, Headers, undefined) of
-        undefined ->
-            unauthorized;
-        AuthHeader ->
-            case binary:split(AuthHeader, <<" ">>) of
-                [<<"Basic">>, Encoded] ->
-                    Decoded = base64:decode(Encoded),
-                    case binary:split(Decoded, <<":">>) of
-                        [_User, Pass] ->
-                            case Pass =:= AdminPassBin of
-                                true -> ok;
-                                false -> unauthorized
-                            end;
-                        _ -> unauthorized
-                    end;
-                _ ->
-                    unauthorized
-            end
+    try cowboy_req:parse_header(<<"authorization">>, Req) of
+        {basic, _User, Pass} when Pass =:= AdminPassBin ->
+            ok;
+        _ ->
+            unauthorized
+    catch
+        _:_ ->
+            unauthorized
     end.
