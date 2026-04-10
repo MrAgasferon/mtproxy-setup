@@ -741,7 +741,7 @@ case "$COMMAND" in
         do_status
         ;;
     *)
-        echo "Использование: bash install.sh [install|backup|restore|update|status]"
+        echo "Использование: bash install.sh [install|backup|restore|cleanup|update|reinstall|status]"
         echo ""
         echo "  install  — установка с нуля"
         echo "  backup   — создать резервную копию"
