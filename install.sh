@@ -8,7 +8,7 @@ set -e
 # =============================================================================
 
 REPO_URL="https://github.com/MrAgasferon/mtproxy-setup"
-UPSTREAM_URL="https://github.com/seriyps/personal_mtproxy.git"
+UPSTREAM_URL="https://github.com/MrAgasferon/personal_mtproxy.git"
 INSTALL_DIR="/root/personal_mtproxy"
 OPT_DIR="/opt/personal_mtproxy"
 BACKUP_DIR="/root/mtproxy_backups"
@@ -18,8 +18,8 @@ SERVICE="personal_mtproxy"
 
 # Последний проверенный рабочий коммит upstream
 # Обновляй после тестирования новых версий
-STABLE_COMMIT="1b839a6"
-STABLE_DATE="2026-04-09"
+STABLE_TAG="v1.0.0"
+STABLE_BRANCH="mtproxy-setup-patches"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -199,7 +199,7 @@ clone_repo() {
         return
     fi
     info "Клонируем personal_mtproxy..."
-    git clone "$UPSTREAM_URL" "$INSTALL_DIR"
+    git clone -b "$STABLE_BRANCH" "$UPSTREAM_URL" "$INSTALL_DIR"
     cd "$INSTALL_DIR"
     git checkout $STABLE_COMMIT
     info "Используется проверенная версия: $STABLE_COMMIT ($STABLE_DATE)"
@@ -484,21 +484,20 @@ do_update() {
 
     cd "$INSTALL_DIR"
 
-    echo ""
     echo "Версия для обновления:"
-    echo "  1) Стабильная ($STABLE_DATE, коммит $STABLE_COMMIT) — проверена"
-    echo "  2) Последняя (master) — на свой риск"
+    echo "  1) Стабильная (тег $STABLE_TAG) — проверена"
+    echo "  2) Последняя (ветка $STABLE_BRANCH)"
     echo "  3) Отмена"
     read -rp "Выберите [1/2/3]: " UPDATE_TYPE
     
     if [ "$UPDATE_TYPE" = "1" ]; then
         git fetch origin
-        git checkout $STABLE_COMMIT
-        info "Используется стабильная версия: $STABLE_COMMIT ($STABLE_DATE)"
+        git checkout tags/$STABLE_TAG
+        info "Используется стабильная версия: $STABLE_TAG"
     elif [ "$UPDATE_TYPE" = "2" ]; then
-        git checkout master
-        git pull origin master
-        info "Используется последняя версия (master)"
+        git checkout $STABLE_BRANCH
+        git pull origin $STABLE_BRANCH
+        info "Используется последняя версия"
     else
         info "Обновление отменено"
         exit 0
