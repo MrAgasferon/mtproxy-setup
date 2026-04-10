@@ -74,3 +74,23 @@ handle(Req = #{method := <<"GET">>, path := <<"/api/connections">>}) ->
 
 handle(Req) ->
     {404, #{error => <<"not found">>}, Req}.
+
+handle(Req = #{method := <<"GET">>, path := <<"/api/metrics">>}) ->
+    case httpc:request(get, {"http://127.0.0.1:9091/metrics", []}, [], []) of
+        {ok, {{_, 200, _}, _, Body}} ->
+            Lines = string:split(Body, "\n", all),
+            Metrics = lists:filtermap(fun(Line) ->
+                case Line of
+                    <<"#", _/binary>> -> false;
+                    <<>> -> false;
+                    _ ->
+                        case binary:split(Line, <<" ">>) of
+                            [Name, Value] -> {true, #{name => Name, value => Value}};
+                            _ -> false
+                        end
+                end
+            end, [list_to_binary(L) || L <- Lines]),
+            {200, Metrics, Req};
+        _ ->
+            {503, #{error => <<"metrics unavailable">>}, Req}
+    end;
