@@ -213,12 +213,6 @@ apply_patches() {
 
     PATCHES_URL="https://raw.githubusercontent.com/MrAgasferon/mtproxy-setup/main"
 
-    curl -fsSL "$PATCHES_URL/patches/pm_web_handler.erl" \
-        -o "$INSTALL_DIR/src/pm_web_handler.erl"
-    curl -fsSL "$PATCHES_URL/patches/pm_auth_middleware.erl" \
-        -o "$INSTALL_DIR/src/pm_auth_middleware.erl"
-    curl -fsSL "$PATCHES_URL/patches/personal_mtproxy_app.erl" \
-        -o "$INSTALL_DIR/src/personal_mtproxy_app.erl"
     curl -fsSL "$PATCHES_URL/htdocs/admin.html" \
         -o "$INSTALL_DIR/priv/htdocs/admin.html"
     curl -fsSL "$PATCHES_URL/htdocs/index.html" \
