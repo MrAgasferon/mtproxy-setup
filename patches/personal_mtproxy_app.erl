@@ -217,7 +217,8 @@ routes() ->
             {"/api/connections", pm_web_handler, []},
             {"/",                cowboy_static, {priv_file, personal_mtproxy, "htdocs/index.html"}},
             {"/admin.html",      cowboy_static, {priv_file, personal_mtproxy, "htdocs/admin.html"}},
-            {"/static/[...]",    cowboy_static, {priv_dir,  personal_mtproxy, "htdocs"}}
+            {"/static/[...]",    cowboy_static, {priv_dir,  personal_mtproxy, "htdocs"}},
+            {"/api/metrics", pm_web_handler, []}
         ]}
     ]).
 
