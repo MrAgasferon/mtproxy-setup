@@ -679,6 +679,7 @@ do_install() {
     echo "    Статус:      bash install.sh status"
     echo "    Бэкап:       bash install.sh backup"
     echo "    Откат:       bash install.sh restore"
+    echo "    Очистка:     bash install.sh cleanup"
     echo "    Обновление:  bash install.sh update"
     echo ""
 }
