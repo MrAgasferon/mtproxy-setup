@@ -72,9 +72,6 @@ handle(Req = #{method := <<"GET">>, path := <<"/api/connections">>}) ->
             || {[Sub], Count} <- Entries],
     {200, List, Req};
 
-handle(Req) ->
-    {404, #{error => <<"not found">>}, Req}.
-
 handle(Req = #{method := <<"GET">>, path := <<"/api/metrics">>}) ->
     case httpc:request(get, {"http://127.0.0.1:9091/metrics", []}, [], []) of
         {ok, {{_, 200, _}, _, Body}} ->
@@ -94,3 +91,6 @@ handle(Req = #{method := <<"GET">>, path := <<"/api/metrics">>}) ->
         _ ->
             {503, #{error => <<"metrics unavailable">>}, Req}
     end;
+
+handle(Req) ->
+    {404, #{error => <<"not found">>}, Req}.
