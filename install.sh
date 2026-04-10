@@ -537,9 +537,7 @@ do_status() {
     fi
 
     # Активные соединения
-    CONNS=$("$OPT_DIR/bin/personal_mtproxy" eval \
-    'lists:sum([maps:get(all_connections, L) || {_, L} <- maps:to_list(ranch:info())]).' \
-    2>/dev/null | tr -d '\n' || echo "N/A")
+    CONNS=$(curl -s http://127.0.0.1:9091/metrics | grep "^mtproto_proxy_connections_count" | awk '{sum += $2} END {print int(sum)}' 2>/dev/null || echo "N/A")
     echo " Соединений:  $CONNS"
 
     # Количество пользователей
