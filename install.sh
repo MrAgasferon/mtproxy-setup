@@ -200,11 +200,9 @@ clone_repo() {
     fi
     info "Клонируем personal_mtproxy..."
     git clone -b "$STABLE_BRANCH" "$UPSTREAM_URL" "$INSTALL_DIR"
-    cd "$INSTALL_DIR"
-    git checkout $STABLE_COMMIT
-    info "Используется проверенная версия: $STABLE_COMMIT ($STABLE_DATE)"
-    sed -i 's|git@github.com:|https://github.com/|g' rebar.config
-    sed -i 's|git@github.com:|https://github.com/|g' rebar.lock
+    info "Используется ветка: $STABLE_BRANCH"
+    sed -i 's|git@github.com:|https://github.com/|g' "$INSTALL_DIR/rebar.config"
+    sed -i 's|git@github.com:|https://github.com/|g' "$INSTALL_DIR/rebar.lock"
     success "Репозиторий клонирован"
 }
 
