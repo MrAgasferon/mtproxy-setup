@@ -123,6 +123,15 @@
   .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; white-space: nowrap; }
   .toast.show { opacity: 1; }
 
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 200; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; width: 320px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+  .modal h3 { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+  .modal-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .modal-row input[type="date"] { flex: 1; padding: 9px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: 'Inter', sans-serif; background: var(--surface); color: var(--text); outline: none; }
+  .modal-btns { display: flex; gap: 8px; margin-top: 16px; }
+  .modal-btns button { flex: 1; padding: 9px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: var(--stat-bg); color: var(--text); }
+  .modal-btns .btn-primary { background: var(--nav-active-bg); color: var(--nav-active-text); border-color: var(--nav-active-bg); }
+
   @media (max-width: 640px) {
     .layout { padding: 14px; }
     .last-update { display: none; }
@@ -175,6 +184,21 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="extend-modal" style="display:none">
+  <div class="modal">
+    <h3>Продлить доступ</h3>
+    <div class="modal-row">
+      <input type="date" id="modal-date" />
+      <button class="btn-2099" onclick="document.getElementById('modal-date').value='2099-12-31'">∞</button>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Оставьте пустым для бессрочного доступа</div>
+    <div class="modal-btns">
+      <button onclick="closeExtendModal()">Отмена</button>
+      <button class="btn-primary" onclick="confirmExtend()">Сохранить</button>
+    </div>
+  </div>
+</div>
 
 <script>
   const saved = localStorage.getItem('mtproxy-theme') || 'light';
@@ -295,6 +319,38 @@
     } catch(e) { alert('Ошибка сети'); }
   }
 
+  let extendTarget = null;
+
+  function extendProxy(sub) {
+    extendTarget = sub;
+    document.getElementById('modal-date').value = '';
+    document.getElementById('extend-modal').style.display = 'flex';
+  }
+
+  function closeExtendModal() {
+    document.getElementById('extend-modal').style.display = 'none';
+    extendTarget = null;
+  }
+
+  async function confirmExtend() {
+    if (!extendTarget) return;
+    const dateVal = document.getElementById('modal-date').value;
+    let expiresAt = 0;
+    if (dateVal) {
+      expiresAt = Math.floor(new Date(dateVal).getTime() / 1000);
+      if (isNaN(expiresAt)) { alert('Неверная дата'); return; }
+    }
+    try {
+      await fetch('/api/proxies?subdomain=' + encodeURIComponent(extendTarget), {
+        method: 'PATCH',
+        body: 'expires_at=' + expiresAt
+      });
+      closeExtendModal();
+      showToast('Дата обновлена');
+      await loadData();
+    } catch(e) { alert('Ошибка сети'); }
+  }
+
   function copyText(text, btn) {
     navigator.clipboard.writeText(text).then(() => {
       const orig = btn.textContent;
@@ -351,6 +407,7 @@
           ${links?`<button class="copy-btn" onclick="copyText('${tme}',this)">t.me</button>
           <button class="copy-btn" onclick="copyText('${tg}',this)">tg://</button>
           <button class="copy-btn" onclick="copyText('${sec}',this)">Секрет</button>`:''}
+          <button class="copy-btn" onclick="extendProxy('${sub}')">Продлить</button>
           <button class="revoke-btn" onclick="revoke('${sub}',this)">Удалить</button>
         </div></td>
       </tr>`;
@@ -392,6 +449,7 @@
           ${links?`<button class="copy-btn" onclick="copyText('${tme}',this)">t.me</button>
           <button class="copy-btn" onclick="copyText('${tg}',this)">tg://</button>
           <button class="copy-btn" onclick="copyText('${sec}',this)">Секрет</button>`:''}
+          <button class="copy-btn" onclick="extendProxy('${sub}')">Продлить</button>
           <button class="revoke-btn" onclick="revoke('${sub}',this)">Удалить</button>
         </div>
       </div>`;
