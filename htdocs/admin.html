@@ -8,221 +8,79 @@
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
 
   :root[data-theme="light"] {
-    --bg: #f8f9fb;
-    --surface: #ffffff;
-    --border: #e5e7eb;
-    --border2: #d1d5db;
-    --text: #111827;
-    --muted: #6b7280;
-    --accent: #111827;
-    --accent-soft: #f3f4f6;
-    --danger: #dc2626;
-    --danger-soft: #fef2f2;
-    --success: #16a34a;
-    --success-soft: #f0fdf4;
-    --card: #ffffff;
-    --stat-bg: #f3f4f6;
-    --nav-active-bg: #111827;
-    --nav-active-text: #ffffff;
-    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+    --bg: #f8f9fb; --surface: #ffffff; --border: #e5e7eb; --border2: #d1d5db;
+    --text: #111827; --muted: #6b7280; --accent-soft: #f3f4f6;
+    --danger: #dc2626; --danger-soft: #fef2f2;
+    --success: #16a34a; --success-soft: #f0fdf4;
+    --warning: #d97706; --warning-soft: #fffbeb;
+    --stat-bg: #f3f4f6; --nav-active-bg: #111827; --nav-active-text: #ffffff;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08); --disabled: #9ca3af;
   }
 
   :root[data-theme="dark"] {
-    --bg: #0a0e1a;
-    --surface: #111827;
-    --border: #1e2d45;
-    --border2: #2a3a55;
-    --text: #e2e8f0;
-    --muted: #64748b;
-    --accent: #00d4ff;
-    --accent-soft: rgba(0,212,255,0.08);
-    --danger: #f87171;
-    --danger-soft: rgba(248,113,113,0.1);
-    --success: #4ade80;
-    --success-soft: rgba(74,222,128,0.1);
-    --card: #131c2e;
-    --stat-bg: #131c2e;
-    --nav-active-bg: #00d4ff;
-    --nav-active-text: #0a0e1a;
-    --shadow: 0 1px 3px rgba(0,0,0,0.3);
+    --bg: #0a0e1a; --surface: #111827; --border: #1e2d45; --border2: #2a3a55;
+    --text: #e2e8f0; --muted: #64748b; --accent-soft: rgba(0,212,255,0.08);
+    --danger: #f87171; --danger-soft: rgba(248,113,113,0.1);
+    --success: #4ade80; --success-soft: rgba(74,222,128,0.1);
+    --warning: #fbbf24; --warning-soft: rgba(251,191,36,0.1);
+    --stat-bg: #131c2e; --nav-active-bg: #00d4ff; --nav-active-text: #0a0e1a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3); --disabled: #4b5563;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background 0.2s, color 0.2s; }
+  .layout { max-width: 1200px; margin: 0 auto; padding: 20px; }
 
-  body {
-    font-family: 'Inter', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    transition: background 0.2s, color 0.2s;
-  }
-
-  .layout { max-width: 1100px; margin: 0 auto; padding: 20px; }
-
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .logo {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text);
-  }
-
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .logo { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: var(--text); }
   .logo em { color: var(--muted); font-style: normal; font-weight: 400; }
-
   .header-right { display: flex; align-items: center; gap: 10px; }
+  .last-update { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .theme-toggle { width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; box-shadow: var(--shadow); }
 
-  .last-update {
-    font-size: 11px;
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-  }
-
-  .theme-toggle {
-    width: 34px; height: 34px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
-    box-shadow: var(--shadow);
-  }
-
-  nav {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 20px;
-  }
-
-  nav a {
-    padding: 7px 14px;
-    border-radius: 7px;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 500;
-    background: var(--surface);
-    transition: all 0.15s;
-    box-shadow: var(--shadow);
-  }
-
+  nav { display: flex; gap: 6px; margin-bottom: 20px; }
+  nav a { padding: 7px 14px; border-radius: 7px; border: 1px solid var(--border); color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 500; background: var(--surface); transition: all 0.15s; box-shadow: var(--shadow); }
   nav a:hover { color: var(--text); border-color: var(--border2); }
+  nav a.active { background: var(--nav-active-bg); color: var(--nav-active-text); border-color: var(--nav-active-bg); }
 
-  nav a.active {
-    background: var(--nav-active-bg);
-    color: var(--nav-active-text);
-    border-color: var(--nav-active-bg);
-  }
-
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-
-  .stat {
-    background: var(--stat-bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px;
-  }
-
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .stat { background: var(--stat-bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
   .stat-label { font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight: 500; }
   .stat-value { font-size: 24px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
 
-  .toolbar {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-
-  .toolbar input {
-    flex: 1;
-    padding: 9px 13px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 14px;
-    font-family: 'Inter', sans-serif;
-    background: var(--surface);
-    color: var(--text);
-    outline: none;
-    box-shadow: var(--shadow);
-    min-width: 0;
-  }
-
-  .toolbar input:focus { border-color: var(--border2); }
+  .toolbar { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .toolbar input { flex: 1; min-width: 0; padding: 9px 13px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif; background: var(--surface); color: var(--text); outline: none; box-shadow: var(--shadow); }
   .toolbar input::placeholder { color: var(--muted); }
 
-  .btn-primary {
-    padding: 9px 14px;
-    background: var(--nav-active-bg);
-    color: var(--nav-active-text);
-    border: none;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    font-family: 'Inter', sans-serif;
-    cursor: pointer;
-    white-space: nowrap;
-  }
+  .expires-wrap { display: flex; gap: 6px; align-items: center; }
+  .expires-wrap input[type="date"] { padding: 9px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: 'Inter', sans-serif; background: var(--surface); color: var(--text); outline: none; box-shadow: var(--shadow); }
+  .btn-2099 { padding: 9px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; background: var(--surface); color: var(--muted); cursor: pointer; white-space: nowrap; box-shadow: var(--shadow); }
+  .btn-2099:hover { color: var(--text); border-color: var(--border2); }
+
+  .btn-primary { padding: 9px 14px; background: var(--nav-active-bg); color: var(--nav-active-text); border: none; border-radius: 8px; font-size: 13px; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; white-space: nowrap; }
 
   .search-wrap { margin-bottom: 14px; }
-
-  .search-wrap input {
-    width: 100%;
-    padding: 9px 13px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 14px;
-    font-family: 'Inter', sans-serif;
-    background: var(--surface);
-    color: var(--text);
-    outline: none;
-    box-shadow: var(--shadow);
-  }
-
+  .search-wrap input { width: 100%; padding: 9px 13px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif; background: var(--surface); color: var(--text); outline: none; box-shadow: var(--shadow); }
   .search-wrap input::placeholder { color: var(--muted); }
 
-  /* ── Desktop table ── */
-  .table-wrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: var(--shadow);
-  }
-
-  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
   thead { background: var(--stat-bg); }
-  th {
-    padding: 10px 14px;
-    text-align: left;
-    font-weight: 500;
-    font-size: 11px;
-    color: var(--muted);
-    border-bottom: 1px solid var(--border);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  th { padding: 10px 12px; text-align: left; font-weight: 500; font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: var(--accent-soft); }
+  tr.inactive td { opacity: 0.5; }
+  tr.expired td { opacity: 0.5; }
 
   .subdomain { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
-  .email { color: var(--muted); font-size: 13px; }
-  .date { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .email { color: var(--muted); font-size: 12px; }
+  .date-cell { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .expires-cell { font-size: 12px; white-space: nowrap; }
+  .expires-forever { color: var(--muted); }
+  .expires-ok { color: var(--success); }
+  .expires-soon { color: var(--warning); }
+  .expires-gone { color: var(--danger); }
 
   .conn-cell { display: flex; align-items: center; gap: 6px; }
   .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
@@ -231,119 +89,49 @@
   .conn-count { font-size: 12px; font-weight: 600; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
   .conn-count.on { color: var(--success); }
 
-  .actions { display: flex; gap: 4px; flex-wrap: wrap; }
+  /* Toggle switch */
+  .toggle-wrap { display: flex; align-items: center; gap: 6px; }
+  .toggle { position: relative; width: 36px; height: 20px; cursor: pointer; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; inset: 0; background: var(--border2); border-radius: 20px; transition: 0.2s; }
+  .toggle-slider::before { content: ''; position: absolute; width: 14px; height: 14px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: 0.2s; }
+  .toggle input:checked + .toggle-slider { background: var(--success); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+  .toggle-label { font-size: 11px; color: var(--muted); }
 
-  .copy-btn {
-    padding: 4px 8px;
-    border: 1px solid var(--border2);
-    color: var(--muted);
-    background: transparent;
-    border-radius: 5px;
-    font-size: 11px;
-    font-family: 'Inter', sans-serif;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
+  .actions { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+  .copy-btn { padding: 4px 8px; border: 1px solid var(--border2); color: var(--muted); background: transparent; border-radius: 5px; font-size: 11px; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s; }
   .copy-btn:hover { color: var(--text); border-color: var(--text); }
   .copy-btn.ok { border-color: var(--success); color: var(--success); }
-
-  .revoke-btn {
-    padding: 4px 8px;
-    border: 1px solid var(--danger);
-    color: var(--danger);
-    background: transparent;
-    border-radius: 5px;
-    font-size: 11px;
-    font-family: 'Inter', sans-serif;
-    cursor: pointer;
-  }
+  .revoke-btn { padding: 4px 8px; border: 1px solid var(--danger); color: var(--danger); background: transparent; border-radius: 5px; font-size: 11px; font-family: 'Inter', sans-serif; cursor: pointer; }
   .revoke-btn:hover { background: var(--danger-soft); }
   .revoke-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  /* ── Mobile cards ── */
+  /* Mobile cards */
   .cards-list { display: none; flex-direction: column; gap: 10px; }
-
-  .user-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px;
-    box-shadow: var(--shadow);
-  }
-
-  .user-card-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-
-  .user-card-sub {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
-    word-break: break-all;
-    flex: 1;
-  }
-
-  .user-card-meta {
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 12px;
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-
-  .user-card-actions {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-
-  .user-card-actions .copy-btn,
-  .user-card-actions .revoke-btn {
-    padding: 7px 12px;
-    font-size: 13px;
-    border-radius: 7px;
-    flex: 1;
-    text-align: center;
-    min-width: 70px;
-  }
+  .user-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; box-shadow: var(--shadow); }
+  .user-card.inactive { opacity: 0.6; }
+  .user-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; gap: 10px; }
+  .user-card-sub { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; word-break: break-all; flex: 1; }
+  .user-card-meta { font-size: 12px; color: var(--muted); margin-bottom: 10px; display: flex; flex-direction: column; gap: 3px; }
+  .user-card-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .user-card-actions .copy-btn, .user-card-actions .revoke-btn { padding: 8px 12px; font-size: 13px; border-radius: 7px; flex: 1; text-align: center; min-width: 60px; }
 
   .empty { padding: 48px; text-align: center; color: var(--muted); font-size: 14px; }
   .loading { padding: 48px; text-align: center; color: var(--muted); }
 
-  .toast {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--text);
-    color: var(--bg);
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s;
-    z-index: 100;
-    white-space: nowrap;
-  }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; white-space: nowrap; }
   .toast.show { opacity: 1; }
 
-  /* ── Responsive ── */
   @media (max-width: 640px) {
     .layout { padding: 14px; }
     .last-update { display: none; }
     .table-wrap { display: none; }
     .cards-list { display: flex; }
     .toolbar { flex-direction: column; }
-    .toolbar input { width: 100%; }
     .btn-primary { width: 100%; text-align: center; padding: 11px; }
     .stats { grid-template-columns: repeat(2, 1fr); }
+    .expires-wrap { flex-wrap: wrap; }
   }
 </style>
 </head>
@@ -371,6 +159,10 @@
 
   <div class="toolbar">
     <input type="text" id="new-email" placeholder="Email нового пользователя (необязательно)" />
+    <div class="expires-wrap">
+      <input type="date" id="new-expires" />
+      <button class="btn-2099" onclick="set2099()">∞ 2099</button>
+    </div>
     <button class="btn-primary" onclick="createProxy()">+ Создать прокси</button>
   </div>
 
@@ -378,10 +170,7 @@
     <input type="text" id="search-input" placeholder="Поиск по email или subdomain..." oninput="renderAll()" />
   </div>
 
-  <!-- Desktop -->
   <div class="table-wrap" id="table-container"><div class="loading">Загрузка...</div></div>
-
-  <!-- Mobile -->
   <div class="cards-list" id="cards-container"></div>
 </div>
 
@@ -398,6 +187,10 @@
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('mtproxy-theme', next);
     document.getElementById('theme-btn').textContent = next === 'dark' ? '☀️' : '🌙';
+  }
+
+  function set2099() {
+    document.getElementById('new-expires').value = '2099-12-31';
   }
 
   let allEntries = [], proxyConfig = {}, connections = {};
@@ -421,6 +214,17 @@
     return { tme: 'https://t.me/proxy?' + params, tg: 'tg://proxy?' + params, secret };
   }
 
+  function formatExpires(expiresAt, expired) {
+    if (!expiresAt || expiresAt === 0) return '<span class="expires-forever">∞ бессрочно</span>';
+    const d = new Date(expiresAt * 1000);
+    const str = d.toLocaleDateString('ru-RU');
+    const now = Date.now() / 1000;
+    const diff = expiresAt - now;
+    if (expired || diff < 0) return `<span class="expires-gone">✕ ${str}</span>`;
+    if (diff < 86400 * 7) return `<span class="expires-soon">⚠ ${str}</span>`;
+    return `<span class="expires-ok">${str}</span>`;
+  }
+
   function updateStats(connList) {
     const totalConns = connList.reduce((s, c) => s + c.connections, 0);
     const online = connList.filter(c => c.connections > 0).length;
@@ -442,7 +246,6 @@
       renderAll();
     } catch(e) {
       document.getElementById('table-container').innerHTML = '<div class="empty">Ошибка загрузки</div>';
-      document.getElementById('cards-container').innerHTML = '<div class="empty">Ошибка загрузки</div>';
     }
   }
 
@@ -460,32 +263,35 @@
 
   async function createProxy() {
     const email = document.getElementById('new-email').value.trim();
-    const body = email ? 'email=' + encodeURIComponent(email) : '';
+    const expiresInput = document.getElementById('new-expires').value;
+    let expiresAt = 0;
+    if (expiresInput) {
+      expiresAt = Math.floor(new Date(expiresInput).getTime() / 1000);
+    }
+    let body = '';
+    if (email) body += 'email=' + encodeURIComponent(email);
+    if (expiresAt) body += (body ? '&' : '') + 'expires_at=' + expiresAt;
     try {
       const data = await (await fetch('/api/proxies', { method: 'POST', body })).json();
       if (data.subdomain) {
         document.getElementById('new-email').value = '';
+        document.getElementById('new-expires').value = '';
         showToast('Прокси создан: ' + data.subdomain.split('.')[0]);
         await loadData();
       } else { alert('Ошибка: ' + JSON.stringify(data)); }
     } catch(e) { alert('Ошибка сети'); }
   }
 
-  async function extendProxy(sub) {
-    const newDate = prompt('Новая дата окончания (ГГГГ-ММ-ДД) или пусто для бессрочного:');
-    if (newDate === null) return; // отмена
-    let expiresAt = 0;
-    if (newDate.trim()) {
-      expiresAt = Math.floor(new Date(newDate.trim()).getTime() / 1000);
-      if (isNaN(expiresAt)) { alert('Неверный формат даты'); return; }
-    }
+  async function toggleActive(subdomain, active) {
     try {
-      await fetch('/api/proxies?subdomain=' + encodeURIComponent(sub), {
+      await fetch('/api/proxies?subdomain=' + encodeURIComponent(subdomain), {
         method: 'PATCH',
-        body: 'expires_at=' + expiresAt
+        body: 'active=' + active
       });
-      showToast('Дата обновлена');
-      await loadData();
+      const entry = allEntries.find(e => e.subdomain === subdomain);
+      if (entry) entry.active = active;
+      renderAll();
+      showToast(active ? 'Прокси активирован' : 'Прокси деактивирован');
     } catch(e) { alert('Ошибка сети'); }
   }
 
@@ -523,22 +329,34 @@
       const tg = links ? links.tg.replace(/'/g,"\\'") : '';
       const sec = links ? links.secret : '';
       const sub = (e.subdomain||'').replace(/'/g,"\\'");
-      return `<tr>
+      const isInactive = !e.active;
+      const isExpired = e.expired;
+      const rowClass = isInactive || isExpired ? (isExpired ? 'expired' : 'inactive') : '';
+      const checked = e.active ? 'checked' : '';
+      return `<tr class="${rowClass}">
         <td><div class="conn-cell"><div class="dot ${conns>0?'dot-on':'dot-off'}"></div><span class="conn-count ${conns>0?'on':''}">${conns}</span></div></td>
         <td class="subdomain">${e.subdomain||''}</td>
         <td class="email">${e.email||'<span style="color:var(--border2)">—</span>'}</td>
-        <td class="date">${date}</td>
+        <td class="date-cell">${date}</td>
+        <td class="expires-cell">${formatExpires(e.expires_at, e.expired)}</td>
+        <td>
+          <div class="toggle-wrap">
+            <label class="toggle">
+              <input type="checkbox" ${checked} onchange="toggleActive('${sub}', this.checked)">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </td>
         <td><div class="actions">
           ${links?`<button class="copy-btn" onclick="copyText('${tme}',this)">t.me</button>
           <button class="copy-btn" onclick="copyText('${tg}',this)">tg://</button>
           <button class="copy-btn" onclick="copyText('${sec}',this)">Секрет</button>`:''}
-          <button class="copy-btn" onclick="extendProxy('${sub}')">Продлить</button>
-          <button class="revoke-btn" onclick="revoke('${sub}',this)">Отозвать</button>
+          <button class="revoke-btn" onclick="revoke('${sub}',this)">Удалить</button>
         </div></td>
       </tr>`;
     }).join('');
     document.getElementById('table-container').innerHTML = `<table>
-      <thead><tr><th>Онлайн</th><th>Subdomain</th><th>Email</th><th>Дата</th><th>Действия</th></tr></thead>
+      <thead><tr><th>Онлайн</th><th>Subdomain</th><th>Email</th><th>Создан</th><th>До</th><th>Статус</th><th>Действия</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
   }
@@ -556,24 +374,25 @@
       const tg = links ? links.tg.replace(/'/g,"\\'") : '';
       const sec = links ? links.secret : '';
       const sub = (e.subdomain||'').replace(/'/g,"\\'");
-      return `<div class="user-card">
+      const checked = e.active ? 'checked' : '';
+      return `<div class="user-card ${!e.active||e.expired?'inactive':''}">
         <div class="user-card-top">
           <div class="user-card-sub">${e.subdomain||''}</div>
-          <div class="conn-cell" style="margin-left:10px;flex-shrink:0">
-            <div class="dot ${conns>0?'dot-on':'dot-off'}"></div>
-            <span class="conn-count ${conns>0?'on':''}">${conns}</span>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+            <div class="conn-cell"><div class="dot ${conns>0?'dot-on':'dot-off'}"></div><span class="conn-count ${conns>0?'on':''}">${conns}</span></div>
+            <label class="toggle"><input type="checkbox" ${checked} onchange="toggleActive('${sub}',this.checked)"><span class="toggle-slider"></span></label>
           </div>
         </div>
         <div class="user-card-meta">
           <span>${e.email||'без email'}</span>
-          <span>${date}</span>
+          <span>Создан: ${date}</span>
+          <span>Действует: ${formatExpires(e.expires_at, e.expired)}</span>
         </div>
         <div class="user-card-actions">
           ${links?`<button class="copy-btn" onclick="copyText('${tme}',this)">t.me</button>
           <button class="copy-btn" onclick="copyText('${tg}',this)">tg://</button>
           <button class="copy-btn" onclick="copyText('${sec}',this)">Секрет</button>`:''}
-          <button class="copy-btn" onclick="extendProxy('${sub}')">Продлить</button>
-          <button class="revoke-btn" onclick="revoke('${sub}',this)">Отозвать</button>
+          <button class="revoke-btn" onclick="revoke('${sub}',this)">Удалить</button>
         </div>
       </div>`;
     }).join('');
@@ -581,17 +400,17 @@
   }
 
   async function revoke(sub, btn) {
-    if (!confirm('Отозвать доступ для ' + sub.split('.')[0] + '?')) return;
+    if (!confirm('Удалить прокси ' + sub.split('.')[0] + '? Это действие необратимо.')) return;
     btn.disabled = true; btn.textContent = '...';
     try {
       const r = await fetch('/api/proxies?subdomain=' + encodeURIComponent(sub), { method: 'DELETE' });
       if (r.ok) {
         allEntries = allEntries.filter(e => e.subdomain !== sub);
         document.getElementById('stat-total').textContent = allEntries.length;
-        showToast('Доступ отозван');
+        showToast('Прокси удалён');
         renderAll();
-      } else { btn.disabled = false; btn.textContent = 'Отозвать'; alert('Ошибка'); }
-    } catch(e) { btn.disabled = false; btn.textContent = 'Отозвать'; alert('Ошибка сети'); }
+      } else { btn.disabled = false; btn.textContent = 'Удалить'; alert('Ошибка'); }
+    } catch(e) { btn.disabled = false; btn.textContent = 'Удалить'; alert('Ошибка сети'); }
   }
 
   loadData();
