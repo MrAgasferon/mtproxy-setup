@@ -635,6 +635,14 @@ do_install() {
     read -rp "Продолжить? [y/N]: " CONFIRM
     [[ "$CONFIRM" =~ ^[Yy]$ ]] || { info "Установка отменена"; exit 0; }
 
+    # Проверяем порт 443
+    info "Проверяем доступность порта 443..."
+    if ss -tlnp | grep -q ':443 '; then
+        error "Порт 443 уже занят. Освободите порт и попробуйте снова:
+      $(ss -tlnp | grep ':443 ' | awk '{print $NF}')"
+    fi
+    success "Порт 443 свободен"
+
     echo ""
     install_deps
     install_erlang
