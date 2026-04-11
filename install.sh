@@ -487,7 +487,6 @@ do_update() {
     elif [ "$UPDATE_TYPE" = "2" ]; then
         git checkout $STABLE_BRANCH
         git reset --hard origin/$STABLE_BRANCH
-        git pull origin $STABLE_BRANCH
         info "Используется последняя версия"
     else
         info "Обновление отменено"
