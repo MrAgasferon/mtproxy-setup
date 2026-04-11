@@ -471,6 +471,24 @@
     } catch(e) { alert('Ошибка сети'); }
   }
 
+  async function extendProxy(sub) {
+    const newDate = prompt('Новая дата окончания (ГГГГ-ММ-ДД) или пусто для бессрочного:');
+    if (newDate === null) return; // отмена
+    let expiresAt = 0;
+    if (newDate.trim()) {
+      expiresAt = Math.floor(new Date(newDate.trim()).getTime() / 1000);
+      if (isNaN(expiresAt)) { alert('Неверный формат даты'); return; }
+    }
+    try {
+      await fetch('/api/proxies?subdomain=' + encodeURIComponent(sub), {
+        method: 'PATCH',
+        body: 'expires_at=' + expiresAt
+      });
+      showToast('Дата обновлена');
+      await loadData();
+    } catch(e) { alert('Ошибка сети'); }
+  }
+
   function copyText(text, btn) {
     navigator.clipboard.writeText(text).then(() => {
       const orig = btn.textContent;
@@ -514,6 +532,7 @@
           ${links?`<button class="copy-btn" onclick="copyText('${tme}',this)">t.me</button>
           <button class="copy-btn" onclick="copyText('${tg}',this)">tg://</button>
           <button class="copy-btn" onclick="copyText('${sec}',this)">Секрет</button>`:''}
+          <button class="copy-btn" onclick="extendProxy('${sub}')">Продлить</button>
           <button class="revoke-btn" onclick="revoke('${sub}',this)">Отозвать</button>
         </div></td>
       </tr>`;
@@ -553,6 +572,7 @@
           ${links?`<button class="copy-btn" onclick="copyText('${tme}',this)">t.me</button>
           <button class="copy-btn" onclick="copyText('${tg}',this)">tg://</button>
           <button class="copy-btn" onclick="copyText('${sec}',this)">Секрет</button>`:''}
+          <button class="copy-btn" onclick="extendProxy('${sub}')">Продлить</button>
           <button class="revoke-btn" onclick="revoke('${sub}',this)">Отозвать</button>
         </div>
       </div>`;
