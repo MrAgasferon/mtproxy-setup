@@ -54,8 +54,6 @@
 
   .expires-wrap { display: flex; gap: 6px; align-items: center; }
   .expires-wrap input[type="date"] { padding: 9px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: 'Inter', sans-serif; background: var(--surface); color: var(--text); outline: none; box-shadow: var(--shadow); }
-  .btn-2099 { padding: 9px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; background: var(--surface); color: var(--muted); cursor: pointer; white-space: nowrap; box-shadow: var(--shadow); }
-  .btn-2099:hover { color: var(--text); border-color: var(--border2); }
 
   .btn-primary { padding: 9px 14px; background: var(--nav-active-bg); color: var(--nav-active-text); border: none; border-radius: 8px; font-size: 13px; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; white-space: nowrap; }
 
@@ -170,7 +168,6 @@
     <input type="text" id="new-email" placeholder="Email нового пользователя (необязательно)" />
     <div class="expires-wrap">
       <input type="date" id="new-expires" />
-      <button class="btn-2099" onclick="set2099()">∞ 2099</button>
     </div>
     <button class="btn-primary" onclick="createProxy()">+ Создать прокси</button>
   </div>
@@ -190,7 +187,6 @@
     <h3>Продлить доступ</h3>
     <div class="modal-row">
       <input type="date" id="modal-date" />
-      <button class="btn-2099" onclick="document.getElementById('modal-date').value='2099-12-31'">∞</button>
     </div>
     <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Оставьте пустым для бессрочного доступа</div>
     <div class="modal-btns">
@@ -211,10 +207,6 @@
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('mtproxy-theme', next);
     document.getElementById('theme-btn').textContent = next === 'dark' ? '☀️' : '🌙';
-  }
-
-  function set2099() {
-    document.getElementById('new-expires').value = '2099-12-31';
   }
 
   let allEntries = [], proxyConfig = {}, connections = {};
