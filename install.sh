@@ -228,6 +228,7 @@ write_config() {
     local domain=$1
     local secret=$2
     local admin_pass=$3
+    local salt=${4:-$(openssl rand -hex 16)}
 
     info "Записываем конфигурацию..."
 
@@ -248,6 +249,8 @@ write_config() {
     ]},
     {allowed_protocols, [mtp_fake_tls]},
     {domain_fronting, "127.0.0.1:1443"},
+    {per_sni_secrets, on},
+    {per_sni_secret_salt, <<"${salt}">>},
     {policy, [
       {in_table, tls_domain, personal_domains},
       {max_connections, [tls_domain], 100}
@@ -471,6 +474,8 @@ do_update() {
     local domain=$(get_domain_from_config)
     local secret=$(grep "secret.*<<" "$cfg" | head -1 | sed 's/.*<<"\(.*\)">>.*/\1/')
     local admin_pass=$(grep "admin_password" "$cfg" | sed 's/.*"\(.*\)".*/\1/')
+    local salt=$(grep "per_sni_secret_salt" "$cfg" | sed 's/.*<<"\(.*\)">>.*/\1/')
+    [ -z "$salt" ] && salt=$(openssl rand -hex 16)
     [ -z "$domain" ] && error "Не удалось определить домен из конфига"
 
     cd "$INSTALL_DIR"
@@ -498,7 +503,7 @@ do_update() {
     sed -i 's|git@github.com:|https://github.com/|g' rebar.lock
 
     apply_patches "$domain"
-    write_config "$domain" "$secret" "$admin_pass"
+    write_config "$domain" "$secret" "$admin_pass" "$salt"
 
     info "Пересобираем..."
     make
@@ -626,6 +631,7 @@ do_install() {
     [ -z "$ADMIN_PASS" ] && error "Пароль не может быть пустым"
 
     SECRET=$(openssl rand -hex 16)
+    SALT=$(openssl rand -hex 16)
     info "Сгенерирован секрет прокси: $SECRET"
 
     echo ""
@@ -659,7 +665,7 @@ do_install() {
 
     clone_repo
     apply_patches "$DOMAIN"
-    write_config "$DOMAIN" "$SECRET" "$ADMIN_PASS"
+    write_config "$DOMAIN" "$SECRET" "$ADMIN_PASS" "$SALT"
     build_and_install
     setup_cron
 
