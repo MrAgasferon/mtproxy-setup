@@ -18,7 +18,7 @@ SERVICE="personal_mtproxy"
 
 # Последний проверенный рабочий коммит upstream
 # Обновляй после тестирования новых версий
-STABLE_TAG="v1.1.0"
+STABLE_TAG="v1.2.0"
 STABLE_BRANCH="mtproxy-setup-patches"
 SCRIPT_BRANCH="main"
 
