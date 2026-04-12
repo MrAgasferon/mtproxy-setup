@@ -20,6 +20,7 @@ SERVICE="personal_mtproxy"
 # Обновляй после тестирования новых версий
 STABLE_TAG="v1.0.0"
 STABLE_BRANCH="mtproxy-setup-patches"
+SCRIPT_BRANCH="main"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
