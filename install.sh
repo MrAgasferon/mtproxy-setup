@@ -179,6 +179,9 @@ get_certificate_duckdns() {
         --non-interactive \
         -d "$domain" \
         -d "*.$domain"
+    mkdir -p /var/lib/personal_mtproxy/$domain
+    cp /etc/letsencrypt/live/$domain/fullchain.pem /var/lib/personal_mtproxy/$domain/
+    cp /etc/letsencrypt/live/$domain/privkey.pem /var/lib/personal_mtproxy/$domain/
 }
 
 get_certificate_http() {
@@ -192,6 +195,9 @@ get_certificate_http() {
         --agree-tos \
         --non-interactive \
         -d "$domain"
+    mkdir -p /var/lib/personal_mtproxy/$domain
+    cp /etc/letsencrypt/live/$domain/fullchain.pem /var/lib/personal_mtproxy/$domain/
+    cp /etc/letsencrypt/live/$domain/privkey.pem /var/lib/personal_mtproxy/$domain/
 }
 
 clone_repo() {
