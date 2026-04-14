@@ -221,19 +221,26 @@ clone_repo() {
 
 apply_patches() {
     local domain=$1
-    
     info "Применяем патчи..."
-    
-    HTDOCS_URL="https://raw.githubusercontent.com/MrAgasferon/personal_mtproxy/$STABLE_BRANCH/priv/htdocs"
-    
-    curl -fsSL "$HTDOCS_URL/admin.html" -o "$INSTALL_DIR/priv/htdocs/admin.html"
-    curl -fsSL "$HTDOCS_URL/index.html" -o "$INSTALL_DIR/priv/htdocs/index.html"
-    curl -fsSL "$HTDOCS_URL/metrics.html" -o "$INSTALL_DIR/priv/htdocs/metrics.html"
-    
+    PATCHES_URL="https://raw.githubusercontent.com/MrAgasferon/mtproxy-setup/main"
+
+    curl -fsSL "$PATCHES_URL/patches/pm_registry.erl" \
+        -o "$INSTALL_DIR/src/pm_registry.erl"
+    curl -fsSL "$PATCHES_URL/patches/pm_web_handler.erl" \
+        -o "$INSTALL_DIR/src/pm_web_handler.erl"
+    curl -fsSL "$PATCHES_URL/patches/pm_auth_middleware.erl" \
+        -o "$INSTALL_DIR/src/pm_auth_middleware.erl"
+    curl -fsSL "$PATCHES_URL/patches/personal_mtproxy_app.erl" \
+        -o "$INSTALL_DIR/src/personal_mtproxy_app.erl"
+    curl -fsSL "$PATCHES_URL/htdocs/admin.html" \
+        -o "$INSTALL_DIR/priv/htdocs/admin.html"
+    curl -fsSL "$PATCHES_URL/htdocs/index.html" \
+        -o "$INSTALL_DIR/priv/htdocs/index.html"
+    curl -fsSL "$PATCHES_URL/htdocs/metrics.html" \
+        -o "$INSTALL_DIR/priv/htdocs/metrics.html"
+
     sed -i "s|example.com|$domain|g" "$INSTALL_DIR/priv/htdocs/index.html"
-    
     success "Патчи применены"
-    
 }
 
 write_config() {
