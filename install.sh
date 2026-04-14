@@ -358,7 +358,7 @@ deploy_beams() {
 
     info "Деплоим скомпилированные модули..."
 
-    for beam in pm_web_handler pm_auth_middleware personal_mtproxy_app; do
+    for beam in pm_web_handler pm_auth_middleware personal_mtproxy_app pm_registry; do
         if [ -f "$build_lib/$beam.beam" ]; then
             cp "$build_lib/$beam.beam" "$lib_dir/ebin/"
         fi
