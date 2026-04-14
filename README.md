@@ -159,14 +159,17 @@ curl -fsSL https://raw.githubusercontent.com/MrAgasferon/mtproxy-setup/main/inst
 ```
 mtproxy-setup/
 ├── install.sh                       # главный скрипт управления
+├── patches/
+│   ├── pm_registry.erl              # реестр пользователей, срок действия
+│   ├── pm_web_handler.erl           # расширенный API handler
+│   ├── pm_auth_middleware.erl       # Basic Auth middleware
+│   └── personal_mtproxy_app.erl    # роуты + middleware + Prometheus
 ├── htdocs/
 │   ├── admin.html                   # панель администратора
 │   ├── metrics.html                 # страница метрик
 │   └── index.html                   # страница-заглушка
 └── README.md
 ```
-
-Erlang патчи хранятся в форке: [MrAgasferon/personal_mtproxy](https://github.com/MrAgasferon/personal_mtproxy/tree/mtproxy-setup-patches)
 
 ## API эндпоинты
 
@@ -188,7 +191,7 @@ Erlang патчи хранятся в форке: [MrAgasferon/personal_mtproxy]
 |------|------------|
 | `/opt/personal_mtproxy/` | Бинарники сервиса |
 | `/root/personal_mtproxy/` | Исходники |
-| `/var/lib/personal_mtproxy/` — База пользователей и сертификаты |
+| `/var/lib/personal_mtproxy/` | База пользователей и сертификаты |
 | `/var/log/personal_mtproxy/` | Логи |
 | `/root/mtproxy_backups/` | Резервные копии |
 | `/etc/systemd/system/personal_mtproxy.service` | Systemd unit |
