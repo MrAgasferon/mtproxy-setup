@@ -182,6 +182,9 @@ get_certificate_duckdns() {
     mkdir -p /var/lib/personal_mtproxy/$domain
     cp /etc/letsencrypt/live/$domain/fullchain.pem /var/lib/personal_mtproxy/$domain/
     cp /etc/letsencrypt/live/$domain/privkey.pem /var/lib/personal_mtproxy/$domain/
+    chown personal_mtproxy:personal_mtproxy /var/lib/personal_mtproxy/$domain/fullchain.pem
+    chown personal_mtproxy:personal_mtproxy /var/lib/personal_mtproxy/$domain/privkey.pem
+    chmod 640 /var/lib/personal_mtproxy/$domain/privkey.pem
 }
 
 get_certificate_http() {
@@ -198,6 +201,9 @@ get_certificate_http() {
     mkdir -p /var/lib/personal_mtproxy/$domain
     cp /etc/letsencrypt/live/$domain/fullchain.pem /var/lib/personal_mtproxy/$domain/
     cp /etc/letsencrypt/live/$domain/privkey.pem /var/lib/personal_mtproxy/$domain/
+    chown personal_mtproxy:personal_mtproxy /var/lib/personal_mtproxy/$domain/fullchain.pem
+    chown personal_mtproxy:personal_mtproxy /var/lib/personal_mtproxy/$domain/privkey.pem
+    chmod 640 /var/lib/personal_mtproxy/$domain/privkey.pem
 }
 
 clone_repo() {
